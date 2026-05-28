@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CETRIOS — Mapa Interactivo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --gold-dark: #8a6a1a;
+    --dark: #0a0804;
+    --parchment: #1a1408;
+    --glow: rgba(201,168,76,0.4);
+    --panel-bg: rgba(10,8,4,0.92);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #050302;
+    font-family: 'Crimson Text', serif;
+    color: var(--gold-light);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    cursor: crosshair;
+  }
+
+  /* ── MAP CONTAINER ── */
+  #map-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #map-stage {
+    position: absolute;
+    top: 0; left: 0;
+    transform-origin: 0 0;
+    transition: transform 0.1s ease-out;
+    will-change: transform;
+  }
+
+  #map-img {
+    display: block;
+    width: 900px;
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+    filter: brightness(0.92) contrast(1.05);
+  }
+
+  /* ── HOTSPOTS ── */
+  .hotspot {
+    position: absolute;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    transform: translate(-50%, -50%);
+    transition: all 0.25s ease;
+  }
+
+  .hotspot-ring {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1.5px solid var(--gold);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s ease;
+  }
+
+  .hotspot-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--gold-light) 0%, var(--gold) 60%, transparent 100%);
+    box-shadow: 0 0 8px var(--gold), 0 0 16px var(--glow);
+    border: 1px solid var(--gold-light);
+    transition: all 0.25s ease;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hotspot:hover .hotspot-ring {
+    opacity: 1;
+    transform: scale(1);
+    animation: pulse-ring 1.5s ease-in-out infinite;
+  }
+
+  .hotspot:hover .hotspot-dot {
+    transform: scale(1.4);
+    box-shadow: 0 0 16px var(--gold), 0 0 32px var(--glow);
+  }
+
+  /* Capital special */
+  .hotspot.capital .hotspot-dot {
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, #fff5c0 0%, var(--gold-light) 40%, var(--gold) 80%);
+    box-shadow: 0 0 12px var(--gold), 0 0 24px var(--gold), 0 0 40px var(--glow);
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(1.3); }
+  }
+
+  @keyframes capital-glow {
+    0%, 100% { box-shadow: 0 0 12px var(--gold), 0 0 24px var(--gold), 0 0 40px var(--glow); }
+    50% { box-shadow: 0 0 20px var(--gold-light), 0 0 40px var(--gold), 0 0 60px var(--glow); }
+  }
+
+  .hotspot.capital .hotspot-dot {
+    animation: capital-glow 2.5s ease-in-out infinite;
+  }
+
+  /* ── TOOLTIP ── */
+  #tooltip {
+    position: fixed;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    max-width: 280px;
+  }
+
+  #tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .tooltip-inner {
+    background: var(--panel-bg);
+    border: 1px solid var(--gold-dark);
+    border-top: 2px solid var(--gold);
+    padding: 14px 18px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.8), 0 0 0 1px rgba(201,168,76,0.1), inset 0 1px 0 rgba(201,168,76,0.2);
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+
+  .tooltip-type {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 4px;
+  }
+
+  .tooltip-name {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--gold-light);
+    line-height: 1.2;
+    margin-bottom: 8px;
+    text-shadow: 0 0 20px var(--glow);
+  }
+
+  .tooltip-desc {
+    font-size: 13px;
+    color: #b8a060;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  .tooltip-tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dark);
+    background: var(--gold-dark);
+    padding: 2px 8px;
+  }
+
+  /* ── DETAIL PANEL ── */
+  #panel {
+    position: fixed;
+    right: 0; top: 0;
+    height: 100%;
+    width: 340px;
+    background: linear-gradient(160deg, rgba(12,9,4,0.98) 0%, rgba(8,6,2,0.98) 100%);
+    border-left: 1px solid var(--gold-dark);
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    z-index: 200;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  #panel.open { transform: translateX(0); }
+
+  .panel-header {
+    padding: 32px 28px 20px;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    position: relative;
+    background: linear-gradient(180deg, rgba(201,168,76,0.05) 0%, transparent 100%);
+  }
+
+  .panel-type {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 8px;
+  }
+
+  .panel-name {
+    font-family: 'Cinzel', serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--gold-light);
+    line-height: 1.1;
+    text-shadow: 0 0 30px var(--glow);
+  }
+
+  .panel-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 32px; height: 32px;
+    border: 1px solid var(--gold-dark);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-family: 'Cinzel', serif;
+  }
+  .panel-close:hover { background: var(--gold-dark); color: var(--dark); }
+
+  .panel-body { padding: 24px 28px; }
+
+  .panel-section {
+    margin-bottom: 24px;
+  }
+
+  .panel-section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+
+  .panel-section p {
+    font-size: 14px;
+    color: #a89050;
+    line-height: 1.75;
+  }
+
+  .panel-section p em {
+    color: var(--gold-light);
+    font-style: normal;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-item {
+    background: rgba(201,168,76,0.04);
+    border: 1px solid rgba(201,168,76,0.12);
+    padding: 10px 12px;
+  }
+
+  .stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-size: 13px;
+    color: var(--gold-light);
+    font-weight: 600;
+  }
+
+  .lore-quote {
+    border-left: 2px solid var(--gold-dark);
+    padding: 10px 14px;
+    background: rgba(201,168,76,0.03);
+    font-style: italic;
+    font-size: 13px;
+    color: #8a7040;
+    line-height: 1.7;
+  }
+
+  /* ── HUD ── */
+  #hud {
+    position: fixed;
+    top: 20px; left: 20px;
+    z-index: 50;
+    pointer-events: none;
+  }
+
+  .hud-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+  }
+
+  .hud-world {
+    font-family: 'Cinzel', serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--gold-light);
+    text-shadow: 0 0 40px var(--glow), 0 2px 4px rgba(0,0,0,0.8);
+    line-height: 1;
+  }
+
+  .hud-sub {
+    font-size: 12px;
+    color: var(--gold-dark);
+    font-style: italic;
+    margin-top: 4px;
+    max-width: 240px;
+    line-height: 1.4;
+  }
+
+  /* ── CONTROLS ── */
+  #controls {
+    position: fixed;
+    bottom: 24px; left: 24px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .ctrl-btn {
+    width: 36px; height: 36px;
+    background: var(--panel-bg);
+    border: 1px solid var(--gold-dark);
+    color: var(--gold);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-family: 'Cinzel', serif;
+    pointer-events: all;
+  }
+  .ctrl-btn:hover { background: var(--gold-dark); color: var(--dark); }
+
+  /* ── LEGEND ── */
+  #legend {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    z-index: 50;
+    background: var(--panel-bg);
+    border: 1px solid var(--gold-dark);
+    padding: 14px 18px;
+    backdrop-filter: blur(8px);
+  }
+
+  .legend-title {
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 11px;
+    color: #8a7040;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1px;
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .ld-capital { background: radial-gradient(circle, #fff5c0, var(--gold)); box-shadow: 0 0 6px var(--gold); }
+  .ld-city { background: radial-gradient(circle, var(--gold-light), var(--gold-dark)); }
+  .ld-region { background: radial-gradient(circle, #7aad9a, #3a6b5a); }
+  .ld-danger { background: radial-gradient(circle, #d44, #922); }
+
+  /* ── LOADING SCREEN ── */
+  #loading {
+    position: fixed;
+    inset: 0;
+    background: #050302;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    transition: opacity 0.8s ease;
+  }
+
+  #loading.done { opacity: 0; pointer-events: none; }
+
+  .loading-title {
+    font-family: 'Cinzel', serif;
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 12px;
+    text-transform: uppercase;
+    text-shadow: 0 0 60px var(--glow);
+    animation: flicker 3s ease-in-out infinite;
+  }
+
+  .loading-sub {
+    font-size: 14px;
+    color: var(--gold-dark);
+    font-style: italic;
+    letter-spacing: 2px;
+  }
+
+  .loading-bar {
+    width: 280px;
+    height: 2px;
+    background: rgba(201,168,76,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .loading-fill {
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    animation: loading-sweep 1.8s ease-in-out infinite;
+  }
+
+  @keyframes loading-sweep {
+    to { left: 100%; }
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.6; }
+    94% { opacity: 1; }
+    96% { opacity: 0.8; }
+    97% { opacity: 1; }
+  }
+
+  /* Scrollbar */
+  #panel::-webkit-scrollbar { width: 4px; }
+  #panel::-webkit-scrollbar-track { background: transparent; }
+  #panel::-webkit-scrollbar-thumb { background: var(--gold-dark); }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="loading-title">CETRIOS</div>
+  <div class="loading-sub">Cargando el mundo antiguo...</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-title">Mapa del Mundo</div>
+  <div class="hud-world">CETRIOS</div>
+  <div class="hud-sub">Un mundo de reinos antiguos, donde la magia savorra entre montañas y mares</div>
+</div>
+
+<!-- MAP -->
+<div id="map-wrap">
+  <div id="map-stage">
+    <img id="map-img" src="map.png" alt="Mapa de Cetrios" draggable="false">
+    <!-- HOTSPOTS injected by JS -->
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div id="tooltip">
+  <div class="tooltip-inner">
+    <div class="tooltip-type" id="tt-type"></div>
+    <div class="tooltip-name" id="tt-name"></div>
+    <div class="tooltip-desc" id="tt-desc"></div>
+    <div class="tooltip-tag" id="tt-tag"></div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div id="panel">
+  <div class="panel-header">
+    <button class="panel-close" onclick="closePanel()">✕</button>
+    <div class="panel-type" id="p-type"></div>
+    <div class="panel-name" id="p-name"></div>
+  </div>
+  <div class="panel-body" id="p-body"></div>
+</div>
+
+<!-- CONTROLS -->
+<div id="controls">
+  <button class="ctrl-btn" onclick="zoom(1.2)" title="Acercar">+</button>
+  <button class="ctrl-btn" onclick="zoom(0.8)" title="Alejar">−</button>
+  <button class="ctrl-btn" onclick="resetView()" title="Restablecer" style="font-size:13px;letter-spacing:0">⌂</button>
+</div>
+
+<!-- LEGEND -->
+<div id="legend">
+  <div class="legend-title">Leyenda</div>
+  <div class="legend-item"><div class="legend-dot ld-capital"></div>Capital</div>
+  <div class="legend-item"><div class="legend-dot ld-city"></div>Ciudad / Reino</div>
+  <div class="legend-item"><div class="legend-dot ld-region"></div>Región / Bosque</div>
+  <div class="legend-item"><div class="legend-dot ld-danger"></div>Zona Peligrosa</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  LOCATIONS DATA
+// ══════════════════════════════════════════════════════
+const locations = [
+  {
+    id: "aethrion",
+    x: 50, y: 44, // percent of image
+    type: "capital",
+    label: "Capital",
+    name: "Aethrion",
+    short: "El corazón palpitante de Cetrios.",
+    tag: "Capital de Cetrios",
+    stats: { Gobierno: "Consejo de los Siete", Población: "~800,000", Magia: "Alta", Fundación: "Año 0" },
+    desc: `<em>Aethrion</em> es la ciudad más antigua y poderosa del mundo conocido. Sus anillos concéntricos no son meros muros, sino capas de historia sedimentada durante milenios.<br><br>En su centro, la Torre del Alba toca las nubes y se dice que fue forjada por los Primeros, seres de magia pura que precedieron a las razas actuales.`,
+    lore: `"Desde el amanecer del mundo hasta su último crepúsculo, Aethrion permanecerá. No porque sus piedras sean eternas, sino porque lleva en su corazón el primer nombre que el mundo pronunció."`,
+    places: ["La Torre del Alba", "El Mercado de los Siete Velos", "Las Catacumbas del Olvido", "Puerta de los Antiguos"]
+  },
+  {
+    id: "velmor",
+    x: 34, y: 24,
+    type: "city",
+    label: "Reino",
+    name: "Velmor",
+    short: "El reino de las montañas del norte.",
+    tag: "Reino del Norte",
+    stats: { Gobierno: "Monarquía", Población: "~120,000", Magia: "Media", Clima: "Glacial" },
+    desc: `<em>Velmor</em> es un reino forjado en roca y frío. Sus habitantes, los Velmori, son guerreros conocidos por su resistencia sobrehumana al dolor y al clima extremo.<br><br>Las torres de piedra negra son famosas en todo Cetrios por su arquitectura imposible, construidas sin mortero gracias a técnicas perdidas.`,
+    lore: `"En Velmor no se llora por los muertos. Se cantan sus nombres durante cuarenta días hasta que el viento los lleva a las Tierras Heladas."`,
+    places: ["Fortaleza Negra", "Minas de Glacianita", "El Foso del Juramento", "Pestro de Hielo"]
+  },
+  {
+    id: "darvanis",
+    x: 21, y: 52,
+    type: "city",
+    label: "Ciudad-Estado",
+    name: "Darvanis",
+    short: "Ciudad de los mercaderes y los secretos.",
+    tag: "Ciudad-Estado del Oeste",
+    stats: { Gobierno: "Gremios", Población: "~90,000", Magia: "Baja", Comercio: "Muy Alto" },
+    desc: `<em>Darvanis</em> nunca fue conquistada por la fuerza. En cambio, compra lo que necesita y vende lo que sobra. Su red de espías es considerada la más efectiva del continente.<br><br>Bajo sus calles adoquinadas existe un laberinto de túneles donde se tratan los negocios que no deben ver la luz del sol.`,
+    lore: `"Si quieres saber el secreto de un rey, pregunta en Darvanis. Si quieres guardar un secreto de por vida, jamás pongas pie en ella."`,
+    places: ["La Bolsa Negra", "Puerto del Contrabando", "Torre de los Gremios", "Roca del Guardián"]
+  },
+  {
+    id: "bosque-korvan",
+    x: 62, y: 22,
+    type: "region",
+    label: "Región",
+    name: "Bosque de Korvan",
+    short: "El bosque que respira y recuerda.",
+    tag: "Bosque Antiguo",
+    stats: { Peligro: "Moderado", Magia: "Muy Alta", Acceso: "Restringido", Secretos: "Muchos" },
+    desc: `Los árboles de <em>Korvan</em> no son árboles normales. Tienen siglos de memoria almacenada en sus raíces, y el Claro del Eco en su centro amplifica los pensamientos hasta volverse audibles.<br><br>Se dice que quien encuentra el árbol central del bosque puede hablar con los muertos una sola vez.`,
+    lore: `"No entres en Korvan cuando la luna esté nueva. El bosque pierde su cordura sin la luz plateada para guiarlo."`,
+    places: ["Claro del Eco", "El Árbol Madre", "Senda de los Susurros", "Lago Espejo"]
+  },
+  {
+    id: "tierras-heladas",
+    x: 50, y: 6,
+    type: "danger",
+    label: "Zona Prohibida",
+    name: "Tierras Heladas",
+    short: "Más allá del norte no hay retorno.",
+    tag: "Tierra Prohibida",
+    stats: { Peligro: "Extremo", Temperatura: "-60°C / -80°C", Exploradores: "Ninguno volvió", Misterio: "Máximo" },
+    desc: `Nadie sabe qué hay más allá de las <em>Tierras Heladas</em>. Las expediciones enviadas por Aethrion nunca regresaron. Los mapas terminan aquí, pero los miedos no.<br><br>Algunas leyendas hablan de una ciudad de cristal negro donde habitan seres de la Era Anterior, esperando el momento de regresar.`,
+    lore: `"Tres expediciones mandé al norte. La primera volvió sin sus líderes. La segunda volvió sin nadie. La tercera... la tercera nunca debió partir." — Archivista Maren, último registro conocido`,
+    places: ["El Muro de Hielo", "Ciudad de Cristal (leyenda)", "El Abismo Sin Nombre"]
+  },
+  {
+    id: "islas-tronox",
+    x: 84, y: 36,
+    type: "region",
+    label: "Archipiélago",
+    name: "Islas de Tronox",
+    short: "Reinos insulares de piratas y magos.",
+    tag: "Archipiélago del Este",
+    stats: { Gobierno: "Consejo Pirata", Magia: "Media", Comercio: "Marítimo", Peligro: "Alto" },
+    desc: `Las <em>Islas de Tronox</em> son un archipiélago gobernado por el Consejo de Capitanes, donde la ley la impone quien tiene el cañón más grande.<br><br>Tronox Mayor alberga la Academia de Magos del Mar, mientras que Tronox Menor es conocida por sus mercados de artefactos robados.`,
+    lore: `"En Tronox no se piden papeles. Se pide oro. Si no tienes oro, ofreces algo de igual valor: información, sangre, o silencio."`,
+    places: ["Puerto Mayor de Tronox", "Academia del Mar", "Tronox Menor", "Arrecife de los Naufragios"]
+  },
+  {
+    id: "valle-arden",
+    x: 50, y: 68,
+    type: "region",
+    label: "Valle",
+    name: "Valle de Arden",
+    short: "El granero del mundo y campo de batallas eternas.",
+    tag: "Corazón de Cetrios",
+    stats: { Producción: "Alta", Batallas: "47 documentadas", Magia: "Baja", Agua: "Abundante" },
+    desc: `El <em>Valle de Arden</em> es fértil y hermoso, lo que lo convierte en el lugar más disputado de la historia. Cada gran guerra de Cetrios tuvo su batalla decisiva aquí.<br><br>El río central, el Arden, corre teñido de un leve tono rojizo por el alto contenido mineral del suelo... o eso dicen los geógrafos.`,
+    lore: `"El Valle de Arden florece cada primavera sin importar cuánta sangre haya bebido el otoño anterior. La tierra no olvida. La tierra transforma."`,
+    places: ["Puente Roto de Liedor", "Cruce de Cicus", "Molinos del Sur", "El Campo Sin Nombre"]
+  },
+  {
+    id: "lagos-eldra",
+    x: 30, y: 68,
+    type: "region",
+    label: "Región Lacustre",
+    name: "Lagos de Eldra",
+    short: "Aguas que guardan secretos milenarios.",
+    tag: "Región del Suroeste",
+    stats: { Peligro: "Moderado", Magia: "Alta", Pesca: "Excepcional", Criaturas: "Conocidas" },
+    desc: `Los <em>Lagos de Eldra</em> son cinco cuerpos de agua interconectados que comparten el mismo sistema de corrientes subterráneas. Se dice que si hablas tu nombre sobre el agua, los peces te recordarán para siempre.<br><br>Puerto de Eldra es la ciudad más importante de la región, famosa por sus barcos de fondo de cristal.`,
+    lore: `"Las aguas de Eldra nunca están quietas del todo. Incluso en los días de mayor calma, algo se mueve en sus profundidades, algo viejo, algo paciente."`,
+    places: ["Puerto de Eldra", "Puerto Inlet", "Roca del Guardián", "El Quinto Lago (sin nombre)"]
+  },
+  {
+    id: "desierto-kael",
+    x: 70, y: 82,
+    type: "region",
+    label: "Desierto",
+    name: "Desierto de Kael",
+    short: "El horno del sur donde duerme el Murmee.",
+    tag: "Sur Lejano",
+    stats: { Temperatura: "+55°C", Peligro: "Muy Alto", Agua: "Escasa", Reliquias: "Abundantes" },
+    desc: `El <em>Desierto de Kael</em> oculta bajo sus arenas las ruinas de la primera civilización de Cetrios. Las pirámides de Botnas son solo la parte visible de una ciudad enterrada que se extiende kilómetros bajo la superficie.<br><br>Y en algún lugar de esa ciudad duerme el <em>Murmee</em>, una entidad antigua que nadie ha podido identificar con claridad.`,
+    lore: `"Las pirámides de Botnas no fueron construidas para honrar a los muertos. Fueron construidas para mantener algo enterrado. Hay una diferencia crucial."`,
+    places: ["Pirámides de Botnas", "Botnas de Kael", "El Murmee Dormido", "Ciudadela Enterrada"]
+  },
+  {
+    id: "serynth",
+    x: 46, y: 88,
+    type: "city",
+    label: "Ciudad",
+    name: "Serynth",
+    short: "La ciudad de los artistas y los exiliados.",
+    tag: "Ciudad del Sur",
+    stats: { Gobierno: "República", Población: "~60,000", Magia: "Media", Arte: "Excepcional" },
+    desc: `<em>Serynth</em> es el destino elegido por aquellos que no encajan en ningún otro lugar. Sus calles están llenas de músicos, pintores, alquimistas y fugitivos de alta alcurnia.<br><br>La ciudad no tiene ejército propio, pero tampoco nadie ha intentado conquistarla dos veces.`,
+    lore: `"Serynth no tiene murallas porque no las necesita. Sus defensas son más sutiles: nadie que haya venido aquí a buscar paz ha querido traer guerra después."`,
+    places: ["Teatro del Último Acto", "Mercado de las Memorias", "La Torre Incompleta", "Puerto Serynth"]
+  },
+  {
+    id: "colinas-vorlen",
+    x: 68, y: 58,
+    type: "region",
+    label: "Región",
+    name: "Colinas de Vorlen",
+    short: "Tierras de viejas alianzas y nuevas traiciones.",
+    tag: "Región del Sureste",
+    stats: { Gobierno: "Señores Locales", Magia: "Baja", Minería: "Alta", Conflictos: "Frecuentes" },
+    desc: `Las <em>Colinas de Vorlen</em> son ricas en minerales y pobres en estabilidad política. Cada colina parece tener su propio señor, su propia ley y su propia historia de agravios.<br><br>Vorten, la ciudad principal, intenta mantener el orden pero los señores colinos rara vez escuchan a alguien que vive en una llanura.`,
+    lore: `"Los Vorleni se saludan preguntando quién es el enemigo del otro. Es su forma de hacer amigos."`,
+    places: ["Ciudad de Vorten", "Minas de Hierro Rojo", "Paso del Acuerdo Roto", "Fortaleza Colinar"]
+  },
+  {
+    id: "mar-norte",
+    x: 85, y: 15,
+    type: "danger",
+    label: "Mar",
+    name: "Mar del Norte",
+    short: "Aguas de tormentas eternas.",
+    tag: "Aguas del Norte",
+    stats: { Peligro: "Muy Alto", Tormentas: "Permanentes", Navegación: "Casi imposible", Criaturas: "Avistadas" },
+    desc: `El <em>Mar del Norte</em> es conocido por sus tormentas que nunca cesan completamente. Los navegantes más experimentados evitan estas aguas entre los meses de sombra.<br><br>Se dice que bajo sus olas existe un cementerio de navíos tan grande como una ciudad, y que sus fantasmas aún intentan encontrar el camino a casa.`,
+    lore: `"El Mar del Norte no se navega. Se sobrevive."`,
+    places: ["El Remolino Eterno", "Ruta de los Valientes (abandonada)", "Cementerio de Navíos"]
+  },
+  {
+    id: "mar-oeste",
+    x: 8, y: 62,
+    type: "danger",
+    label: "Mar",
+    name: "Mar del Oeste",
+    short: "Donde vive el guardián de tentáculos.",
+    tag: "Aguas del Oeste",
+    stats: { Peligro: "Extremo", Criatura: "Confirmada", Comercio: "Bloqueado", Misterio: "Alto" },
+    desc: `El <em>Mar del Oeste</em> estaría abierto al comercio si no fuera por el ser que habita la Roca del Guardián. La criatura de tentáculos ha hundido más de doscientos barcos en los últimos tres siglos.<br><br>Darvanis ha ofrecido fortunas por la cabeza del monstruo. Nadie ha regresado con ella.`,
+    lore: `"El Guardián no ataca por hambre. Ataca por territorio. Hay quienes dicen que si llevas la ofrenda correcta, te deja pasar. Nadie sabe cuál es la ofrenda correcta."`,
+    places: ["Roca del Guardián", "Lomír (pueblo costero)", "Bahía del Naufragio"]
+  }
+];
+
+// ══════════════════════════════════════════════════════
+//  DOM SETUP
+// ══════════════════════════════════════════════════════
+const stage = document.getElementById('map-stage');
+const mapImg = document.getElementById('map-img');
+const tooltip = document.getElementById('tooltip');
+const panel = document.getElementById('panel');
+
+let scale = 1, posX = 0, posY = 0;
+let isDragging = false, startX, startY;
+
+// ── Create hotspots after image loads
+mapImg.onload = function() {
+  const iw = mapImg.naturalWidth;
+  const ih = mapImg.naturalHeight;
+
+  locations.forEach(loc => {
+    const wrap = document.createElement('div');
+    wrap.className = 'hotspot ' + (loc.type === 'capital' ? 'capital' : '');
+    wrap.style.left = (loc.x / 100 * 900) + 'px';
+    wrap.style.top = (loc.y / 100 * (900 * ih / iw)) + 'px';
+
+    const ring = document.createElement('div');
+    ring.className = 'hotspot-ring';
+
+    const dot = document.createElement('div');
+    dot.className = 'hotspot-dot';
+
+    // Danger zones: red dot
+    if (loc.type === 'danger') {
+      dot.style.background = 'radial-gradient(circle, #ff6666 0%, #cc2222 60%, transparent 100%)';
+      dot.style.boxShadow = '0 0 8px #cc2222, 0 0 16px rgba(204,34,34,0.4)';
+    } else if (loc.type === 'region') {
+      dot.style.background = 'radial-gradient(circle, #9addc0 0%, #4a8a6a 60%, transparent 100%)';
+      dot.style.boxShadow = '0 0 8px #4a8a6a, 0 0 16px rgba(74,138,106,0.4)';
+    }
+
+    wrap.appendChild(ring);
+    wrap.appendChild(dot);
+    wrap.dataset.id = loc.id;
+
+    wrap.addEventListener('mouseenter', (e) => showTooltip(e, loc));
+    wrap.addEventListener('mouseleave', hideTooltip);
+    wrap.addEventListener('mousemove', (e) => moveTooltip(e));
+    wrap.addEventListener('click', (e) => { e.stopPropagation(); openPanel(loc); });
+
+    stage.appendChild(wrap);
+  });
+
+  // Fit map to window
+  fitMap();
+
+  // Hide loading screen
+  setTimeout(() => {
+    document.getElementById('loading').classList.add('done');
+    setTimeout(() => document.getElementById('loading').remove(), 1000);
+  }, 1500);
+};
+
+// If image already cached
+if (mapImg.complete) mapImg.onload();
+
+// ── TOOLTIP
+function showTooltip(e, loc) {
+  document.getElementById('tt-type').textContent = loc.label;
+  document.getElementById('tt-name').textContent = loc.name;
+  document.getElementById('tt-desc').textContent = loc.short;
+  document.getElementById('tt-tag').textContent = loc.tag;
+  tooltip.classList.add('visible');
+  moveTooltip(e);
+}
+
+function moveTooltip(e) {
+  const tw = 290, th = 120;
+  let x = e.clientX + 16;
+  let y = e.clientY + 16;
+  if (x + tw > window.innerWidth) x = e.clientX - tw - 16;
+  if (y + th > window.innerHeight) y = e.clientY - th - 16;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+
+function hideTooltip() { tooltip.classList.remove('visible'); }
+
+// ── PANEL
+function openPanel(loc) {
+  document.getElementById('p-type').textContent = loc.label;
+  document.getElementById('p-name').textContent = loc.name;
+
+  let html = '';
+
+  // Description
+  html += `<div class="panel-section">
+    <div class="panel-section-title">Descripción</div>
+    <p>${loc.desc}</p>
+  </div>`;
+
+  // Stats
+  if (loc.stats) {
+    html += `<div class="panel-section">
+      <div class="panel-section-title">Datos</div>
+      <div class="stat-grid">`;
+    Object.entries(loc.stats).forEach(([k, v]) => {
+      html += `<div class="stat-item"><div class="stat-label">${k}</div><div class="stat-value">${v}</div></div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // Lore quote
+  if (loc.lore) {
+    html += `<div class="panel-section">
+      <div class="panel-section-title">Crónicas</div>
+      <div class="lore-quote">${loc.lore}</div>
+    </div>`;
+  }
+
+  // Places
+  if (loc.places && loc.places.length) {
+    html += `<div class="panel-section">
+      <div class="panel-section-title">Lugares de Interés</div>`;
+    loc.places.forEach(p => {
+      html += `<p style="padding:4px 0;border-bottom:1px solid rgba(201,168,76,0.08);">◆ <em>${p}</em></p>`;
+    });
+    html += `</div>`;
+  }
+
+  document.getElementById('p-body').innerHTML = html;
+  panel.classList.add('open');
+}
+
+function closePanel() { panel.classList.remove('open'); }
+
+// ── PAN & ZOOM
+function applyTransform() {
+  stage.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+}
+
+function fitMap() {
+  const iw = mapImg.naturalWidth || 900;
+  const ih = mapImg.naturalHeight || 1100;
+  const ww = window.innerWidth;
+  const wh = window.innerHeight;
+  scale = Math.min(ww / iw, wh / ih) * 0.95;
+  posX = (ww - iw * scale) / 2;
+  posY = (wh - ih * scale) / 2;
+  applyTransform();
+}
+
+function zoom(factor) {
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  const before = { x: (cx - posX) / scale, y: (cy - posY) / scale };
+  scale = Math.max(0.3, Math.min(4, scale * factor));
+  posX = cx - before.x * scale;
+  posY = cy - before.y * scale;
+  applyTransform();
+}
+
+function resetView() { fitMap(); }
+
+// Mouse pan
+const wrap = document.getElementById('map-wrap');
+wrap.addEventListener('mousedown', e => {
+  if (e.target.closest('.hotspot')) return;
+  isDragging = true;
+  startX = e.clientX - posX;
+  startY = e.clientY - posY;
+  wrap.style.cursor = 'grabbing';
+});
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  posX = e.clientX - startX;
+  posY = e.clientY - startY;
+  applyTransform();
+});
+window.addEventListener('mouseup', () => { isDragging = false; wrap.style.cursor = 'crosshair'; });
+
+// Wheel zoom
+wrap.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.1 : 0.9;
+  const before = { x: (e.clientX - posX) / scale, y: (e.clientY - posY) / scale };
+  scale = Math.max(0.3, Math.min(4, scale * factor));
+  posX = e.clientX - before.x * scale;
+  posY = e.clientY - before.y * scale;
+  applyTransform();
+}, { passive: false });
+
+// Touch support
+let lastDist = 0, touches = [];
+wrap.addEventListener('touchstart', e => {
+  touches = e.touches;
+  if (touches.length === 1) {
+    startX = touches[0].clientX - posX;
+    startY = touches[0].clientY - posY;
+  } else if (touches.length === 2) {
+    lastDist = Math.hypot(touches[1].clientX - touches[0].clientX, touches[1].clientY - touches[0].clientY);
+  }
+}, { passive: true });
+
+wrap.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1 && !e.target.closest('.hotspot')) {
+    posX = e.touches[0].clientX - startX;
+    posY = e.touches[0].clientY - startY;
+    applyTransform();
+  } else if (e.touches.length === 2) {
+    const dist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
+    const factor = dist / lastDist;
+    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    const before = { x: (cx - posX) / scale, y: (cy - posY) / scale };
+    scale = Math.max(0.3, Math.min(4, scale * factor));
+    posX = cx - before.x * scale;
+    posY = cy - before.y * scale;
+    lastDist = dist;
+    applyTransform();
+  }
+}, { passive: false });
+
+window.addEventListener('resize', fitMap);
+</script>
+</body>
+</html>
