@@ -548,7 +548,7 @@ const locations = [
     name: "Aethrion",
     short: "El corazón palpitante de Cetrios.",
     tag: "Capital de Cetrios",
-    stats: { Gobierno: "Consejo de los Siete", Población: "~800,000", Magia: "Alta", Fundación: "Año 0" },
+    stats: { Población: "~800,000", Clima: "Templado", Fundación: "Año 0" },
     desc: `<em>Aethrion</em> es la ciudad más antigua y poderosa del mundo conocido. Sus anillos concéntricos no son meros muros, sino capas de historia sedimentada durante milenios.<br><br>En su centro, la Torre del Alba toca las nubes y se dice que fue forjada por los Primeros, seres de magia pura que precedieron a las razas actuales.`,
     lore: `"Desde el amanecer del mundo hasta su último crepúsculo, Aethrion permanecerá. No porque sus piedras sean eternas, sino porque lleva en su corazón el primer nombre que el mundo pronunció."`,
     places: ["La Torre del Alba", "El Mercado de los Siete Velos", "Las Catacumbas del Olvido", "Puerta de los Antiguos"]
@@ -561,7 +561,7 @@ const locations = [
     name: "Velmor",
     short: "El reino de las montañas del norte.",
     tag: "Reino del Norte",
-    stats: { Gobierno: "Monarquía", Población: "~120,000", Magia: "Media", Clima: "Glacial" },
+    stats: { Población: "~120,000", Clima: "Glacial" },
     desc: `<em>Velmor</em> es un reino forjado en roca y frío. Sus habitantes, los Velmori, son guerreros conocidos por su resistencia sobrehumana al dolor y al clima extremo.<br><br>Las torres de piedra negra son famosas en todo Cetrios por su arquitectura imposible, construidas sin mortero gracias a técnicas perdidas.`,
     lore: `"En Velmor no se llora por los muertos. Se cantan sus nombres durante cuarenta días hasta que el viento los lleva a las Tierras Heladas."`,
     places: ["Fortaleza Negra", "Minas de Glacianita", "El Foso del Juramento", "Pestro de Hielo"]
@@ -574,7 +574,7 @@ const locations = [
     name: "Darvanis",
     short: "Ciudad de los mercaderes y los secretos.",
     tag: "Ciudad-Estado del Oeste",
-    stats: { Gobierno: "Gremios", Población: "~90,000", Magia: "Baja", Comercio: "Muy Alto" },
+    stats: { Población: "~90,000", Clima: "Oceánico", Comercio: "Muy Alto" },
     desc: `<em>Darvanis</em> nunca fue conquistada por la fuerza. En cambio, compra lo que necesita y vende lo que sobra. Su red de espías es considerada la más efectiva del continente.<br><br>Bajo sus calles adoquinadas existe un laberinto de túneles donde se tratan los negocios que no deben ver la luz del sol.`,
     lore: `"Si quieres saber el secreto de un rey, pregunta en Darvanis. Si quieres guardar un secreto de por vida, jamás pongas pie en ella."`,
     places: ["La Bolsa Negra", "Puerto del Contrabando", "Torre de los Gremios", "Roca del Guardián"]
@@ -587,7 +587,7 @@ const locations = [
     name: "Bosque de Korvan",
     short: "El bosque que respira y recuerda.",
     tag: "Bosque Antiguo",
-    stats: { Peligro: "Moderado", Magia: "Muy Alta", Acceso: "Restringido", Secretos: "Muchos" },
+    stats: { Clima: "Húmedo", Acceso: "Restringido", Secretos: "Muchos" },
     desc: `Los árboles de <em>Korvan</em> no son árboles normales. Tienen siglos de memoria almacenada en sus raíces, y el Claro del Eco en su centro amplifica los pensamientos hasta volverse audibles.<br><br>Se dice que quien encuentra el árbol central del bosque puede hablar con los muertos una sola vez.`,
     lore: `"No entres en Korvan cuando la luna esté nueva. El bosque pierde su cordura sin la luz plateada para guiarlo."`,
     places: ["Claro del Eco", "El Árbol Madre", "Senda de los Susurros", "Lago Espejo"]
@@ -600,7 +600,7 @@ const locations = [
     name: "Tierras Heladas",
     short: "Más allá del norte no hay retorno.",
     tag: "Tierra Prohibida",
-    stats: { Peligro: "Extremo", Temperatura: "-60°C / -80°C", Exploradores: "Ninguno volvió", Misterio: "Máximo" },
+    stats: { Peligro: "Extremo", Clima: "-60°C / -80°C", Exploradores: "Ninguno volvió" },
     desc: `Nadie sabe qué hay más allá de las <em>Tierras Heladas</em>. Las expediciones enviadas por Aethrion nunca regresaron. Los mapas terminan aquí, pero los miedos no.<br><br>Algunas leyendas hablan de una ciudad de cristal negro donde habitan seres de la Era Anterior, esperando el momento de regresar.`,
     lore: `"Tres expediciones mandé al norte. La primera volvió sin sus líderes. La segunda volvió sin nadie. La tercera... la tercera nunca debió partir." — Archivista Maren, último registro conocido`,
     places: ["El Muro de Hielo", "Ciudad de Cristal (leyenda)", "El Abismo Sin Nombre"]
@@ -613,7 +613,7 @@ const locations = [
     name: "Islas de Tronox",
     short: "Reinos insulares de piratas y magos.",
     tag: "Archipiélago del Este",
-    stats: { Gobierno: "Consejo Pirata", Magia: "Media", Comercio: "Marítimo", Peligro: "Alto" },
+    stats: { Población: "~45,000", Clima: "Marino", Comercio: "Marítimo" },
     desc: `Las <em>Islas de Tronox</em> son un archipiélago gobernado por el Consejo de Capitanes, donde la ley la impone quien tiene el cañón más grande.<br><br>Tronox Mayor alberga la Academia de Magos del Mar, mientras que Tronox Menor es conocida por sus mercados de artefactos robados.`,
     lore: `"En Tronox no se piden papeles. Se pide oro. Si no tienes oro, ofreces algo de igual valor: información, sangre, o silencio."`,
     places: ["Puerto Mayor de Tronox", "Academia del Mar", "Tronox Menor", "Arrecife de los Naufragios"]
@@ -626,7 +626,7 @@ const locations = [
     name: "Valle de Arden",
     short: "El granero del mundo y campo de batallas eternas.",
     tag: "Corazón de Cetrios",
-    stats: { Producción: "Alta", Batallas: "47 documentadas", Magia: "Baja", Agua: "Abundante" },
+    stats: { Clima: "Templado", Batallas: "47 documentadas", Agua: "Abundante" },
     desc: `El <em>Valle de Arden</em> es fértil y hermoso, lo que lo convierte en el lugar más disputado de la historia. Cada gran guerra de Cetrios tuvo su batalla decisiva aquí.<br><br>El río central, el Arden, corre teñido de un leve tono rojizo por el alto contenido mineral del suelo... o eso dicen los geógrafos.`,
     lore: `"El Valle de Arden florece cada primavera sin importar cuánta sangre haya bebido el otoño anterior. La tierra no olvida. La tierra transforma."`,
     places: ["Puente Roto de Liedor", "Cruce de Cicus", "Molinos del Sur", "El Campo Sin Nombre"]
@@ -639,7 +639,7 @@ const locations = [
     name: "Lagos de Eldra",
     short: "Aguas que guardan secretos milenarios.",
     tag: "Región del Suroeste",
-    stats: { Peligro: "Moderado", Magia: "Alta", Pesca: "Excepcional", Criaturas: "Conocidas" },
+    stats: { Peligro: "Moderado", Clima: "Húmedo", Pesca: "Excepcional" },
     desc: `Los <em>Lagos de Eldra</em> son cinco cuerpos de agua interconectados que comparten el mismo sistema de corrientes subterráneas. Se dice que si hablas tu nombre sobre el agua, los peces te recordarán para siempre.<br><br>Puerto de Eldra es la ciudad más importante de la región, famosa por sus barcos de fondo de cristal.`,
     lore: `"Las aguas de Eldra nunca están quietas del todo. Incluso en los días de mayor calma, algo se mueve en sus profundidades, algo viejo, algo paciente."`,
     places: ["Puerto de Eldra", "Puerto Inlet", "Roca del Guardián", "El Quinto Lago (sin nombre)"]
@@ -652,7 +652,7 @@ const locations = [
     name: "Desierto de Kael",
     short: "El horno del sur donde duerme el Murmee.",
     tag: "Sur Lejano",
-    stats: { Temperatura: "+55°C", Peligro: "Muy Alto", Agua: "Escasa", Reliquias: "Abundantes" },
+    stats: { Peligro: "Muy Alto", Clima: "+55°C", Agua: "Escasa" },
     desc: `El <em>Desierto de Kael</em> oculta bajo sus arenas las ruinas de la primera civilización de Cetrios. Las pirámides de Botnas son solo la parte visible de una ciudad enterrada que se extiende kilómetros bajo la superficie.<br><br>Y en algún lugar de esa ciudad duerme el <em>Murmee</em>, una entidad antigua que nadie ha podido identificar con claridad.`,
     lore: `"Las pirámides de Botnas no fueron construidas para honrar a los muertos. Fueron construidas para mantener algo enterrado. Hay una diferencia crucial."`,
     places: ["Pirámides de Botnas", "Botnas de Kael", "El Murmee Dormido", "Ciudadela Enterrada"]
@@ -665,7 +665,7 @@ const locations = [
     name: "Serynth",
     short: "La ciudad de los artistas y los exiliados.",
     tag: "Ciudad del Sur",
-    stats: { Gobierno: "República", Población: "~60,000", Magia: "Media", Arte: "Excepcional" },
+    stats: { Población: "~60,000", Clima: "Cálido", Arte: "Excepcional" },
     desc: `<em>Serynth</em> es el destino elegido por aquellos que no encajan en ningún otro lugar. Sus calles están llenas de músicos, pintores, alquimistas y fugitivos de alta alcurnia.<br><br>La ciudad no tiene ejército propio, pero tampoco nadie ha intentado conquistarla dos veces.`,
     lore: `"Serynth no tiene murallas porque no las necesita. Sus defensas son más sutiles: nadie que haya venido aquí a buscar paz ha querido traer guerra después."`,
     places: ["Teatro del Último Acto", "Mercado de las Memorias", "La Torre Incompleta", "Puerto Serynth"]
@@ -678,7 +678,7 @@ const locations = [
     name: "Colinas de Vorlen",
     short: "Tierras de viejas alianzas y nuevas traiciones.",
     tag: "Región del Sureste",
-    stats: { Gobierno: "Señores Locales", Magia: "Baja", Minería: "Alta", Conflictos: "Frecuentes" },
+    stats: { Población: "~35,000", Clima: "Continental", Minería: "Alta" },
     desc: `Las <em>Colinas de Vorlen</em> son ricas en minerales y pobres en estabilidad política. Cada colina parece tener su propio señor, su propia ley y su propia historia de agravios.<br><br>Vorten, la ciudad principal, intenta mantener el orden pero los señores colinos rara vez escuchan a alguien que vive en una llanura.`,
     lore: `"Los Vorleni se saludan preguntando quién es el enemigo del otro. Es su forma de hacer amigos."`,
     places: ["Ciudad de Vorten", "Minas de Hierro Rojo", "Paso del Acuerdo Roto", "Fortaleza Colinar"]
@@ -691,7 +691,7 @@ const locations = [
     name: "Mar del Norte",
     short: "Aguas de tormentas eternas.",
     tag: "Aguas del Norte",
-    stats: { Peligro: "Muy Alto", Tormentas: "Permanentes", Navegación: "Casi imposible", Criaturas: "Avistadas" },
+    stats: { Peligro: "Muy Alto", Clima: "Tormentas permanentes", Navegación: "Casi imposible" },
     desc: `El <em>Mar del Norte</em> es conocido por sus tormentas que nunca cesan completamente. Los navegantes más experimentados evitan estas aguas entre los meses de sombra.<br><br>Se dice que bajo sus olas existe un cementerio de navíos tan grande como una ciudad, y que sus fantasmas aún intentan encontrar el camino a casa.`,
     lore: `"El Mar del Norte no se navega. Se sobrevive."`,
     places: ["El Remolino Eterno", "Ruta de los Valientes (abandonada)", "Cementerio de Navíos"]
@@ -704,7 +704,7 @@ const locations = [
     name: "Mar del Oeste",
     short: "Donde vive el guardián de tentáculos.",
     tag: "Aguas del Oeste",
-    stats: { Peligro: "Extremo", Criatura: "Confirmada", Comercio: "Bloqueado", Misterio: "Alto" },
+    stats: { Peligro: "Extremo", Clima: "Tormentoso", Comercio: "Bloqueado" },
     desc: `El <em>Mar del Oeste</em> estaría abierto al comercio si no fuera por el ser que habita la Roca del Guardián. La criatura de tentáculos ha hundido más de doscientos barcos en los últimos tres siglos.<br><br>Darvanis ha ofrecido fortunas por la cabeza del monstruo. Nadie ha regresado con ella.`,
     lore: `"El Guardián no ataca por hambre. Ataca por territorio. Hay quienes dicen que si llevas la ofrenda correcta, te deja pasar. Nadie sabe cuál es la ofrenda correcta."`,
     places: ["Roca del Guardián", "Lomír (pueblo costero)", "Bahía del Naufragio"]
