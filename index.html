@@ -529,7 +529,7 @@
 <div id="hud">
   <div class="hud-title">Mapa del Mundo</div>
   <div class="hud-world">CETRIOS</div>
-  <div class="hud-sub">Un mundo de reinos antiguos, donde la magia savorra entre montañas y mares</div>
+  <div class="hud-sub">Un mundo de reinos antiguos, donde los Ecos despiertan entre montañas y mares</div>
 </div>
 
 <div id="map-wrap">
@@ -846,7 +846,7 @@ const locations = [
     name: "Aethrion",
     short: "El corazón palpitante de Cetrios.",
     stats: { Población: "~800,000", Clima: "Templado", Fundación: "Año 0" },
-    desc: `<em>Aethrion</em> es la ciudad más antigua y poderosa del mundo conocido. Sus anillos concéntricos no son meros muros, sino capas de historia sedimentada durante milenios.<br><br>En su centro, la Torre del Alba toca las nubes y se dice que fue forjada por los Primeros, seres de magia pura que precedieron a las razas actuales.`,
+    desc: `<em>Aethrion</em> es la ciudad más antigua y poderosa del mundo conocido. Sus anillos concéntricos no son meros muros, sino capas de historia sedimentada durante milenios.<br><br>En su centro, la Torre del Alba toca las nubes. Se dice que fue construida por los Primeros, seres de Ecos tan poderosos que precedieron a todas las razas conocidas.`,
     lore: `"Desde el amanecer del mundo hasta su último crepúsculo, Aethrion permanecerá. No porque sus piedras sean eternas, sino porque lleva en su corazón el primer nombre que el mundo pronunció."`,
     places: ["La Torre del Alba", "El Mercado de los Siete Velos", "Las Catacumbas del Olvido", "Puerta de los Antiguos"]
   },
@@ -873,7 +873,7 @@ const locations = [
     name: "Bosque de Korvan",
     short: "El bosque que respira y recuerda.",
     stats: { Clima: "Húmedo", Acceso: "Restringido", Secretos: "Muchos" },
-    desc: `Los árboles de <em>Korvan</em> no son árboles normales. Tienen siglos de memoria almacenada en sus raíces, y el Claro del Eco en su centro amplifica los pensamientos hasta volverse audibles.<br><br>Se dice que quien encuentra el árbol central del bosque puede hablar con los muertos una sola vez.`,
+    desc: `Los árboles de <em>Korvan</em> no son árboles normales. Tienen siglos de memoria almacenada en sus raíces, y el Claro del Eco en su centro amplifica los Ecos de quienes lo atraviesan hasta volverse audibles para todos.<br><br>Se dice que quien encuentra el árbol central del bosque puede escuchar el Eco de los muertos una sola vez.`,
     lore: `"No entres en Korvan cuando la luna esté nueva. El bosque pierde su cordura sin la luz plateada para guiarlo."`,
     places: ["Claro del Eco", "El Árbol Madre", "Senda de los Susurros", "Lago Espejo"]
   },
@@ -891,9 +891,9 @@ const locations = [
     name: "Islas de Tronox",
     short: "Reinos insulares de piratas y magos.",
     stats: { Población: "~45,000", Clima: "Marino", Comercio: "Marítimo" },
-    desc: `Las <em>Islas de Tronox</em> son un archipiélago gobernado por el Consejo de Capitanes, donde la ley la impone quien tiene el cañón más grande.<br><br>Tronox Mayor alberga la Academia de Magos del Mar, mientras que Tronox Menor es conocida por sus mercados de artefactos robados.`,
+    desc: `Las <em>Islas de Tronox</em> son un archipiélago gobernado por el Consejo de Capitanes, donde la ley la impone quien tiene el cañón más grande.<br><br>En <em>Tronox Menor</em> residen los <strong>Tres Gigantes</strong> — seres ancestrales de Ecos extraordinarios que toman las decisiones más importantes del archipiélago. Nadie los convoca: hay que ir hasta ellos.`,
     lore: `"En Tronox no se piden papeles. Se pide oro. Si no tienes oro, ofreces algo de igual valor: información, sangre, o silencio."`,
-    places: ["Puerto Mayor de Tronox", "Academia del Mar", "Tronox Menor", "Arrecife de los Naufragios"]
+    places: ["Puerto Mayor de Tronox", "Los Tres Gigantes (Tronox Menor)", "Tronox Menor", "Arrecife de los Naufragios"]
   },
   {
     id: "valle-arden", x: 50, y: 68, type: "region", label: "Valle",
@@ -916,11 +916,11 @@ const locations = [
   {
     id: "desierto-kael", x: 70, y: 82, type: "region", label: "Desierto",
     name: "Desierto de Kael",
-    short: "El horno del sur donde duerme el Murmee.",
+    short: "El horno del sur donde duerme Murmex.",
     stats: { Peligro: "Muy Alto", Clima: "+55°C", Agua: "Escasa" },
-    desc: `El <em>Desierto de Kael</em> oculta bajo sus arenas las ruinas de la primera civilización de Cetrios. Las pirámides de Botnas son solo la parte visible de una ciudad enterrada.<br><br>Y en algún lugar duerme el <em>Murmee</em>, una entidad antigua que nadie ha podido identificar.`,
+    desc: `El <em>Desierto de Kael</em> oculta bajo sus arenas las ruinas de la primera civilización de Cetrios. Las pirámides de Botnas son solo la parte visible de una ciudad enterrada que se extiende kilómetros bajo la superficie.<br><br>En lo más profundo de esas ruinas duerme <em>Murmex</em> — una entidad de poder inconmensurable, cuya historia pertenece a los tiempos que aún no han llegado.`,
     lore: `"Las pirámides de Botnas no fueron construidas para honrar a los muertos. Fueron construidas para mantener algo enterrado. Hay una diferencia crucial."`,
-    places: ["Pirámides de Botnas", "Botnas de Kael", "El Murmee Dormido", "Ciudadela Enterrada"]
+    places: ["Pirámides de Botnas", "Botnas de Kael", "Las Ruinas de la Primera Ciudad", "El Sello de Murmex"]
   },
   {
     id: "serynth", x: 46, y: 88, type: "city", label: "Ciudad",
@@ -941,7 +941,15 @@ const locations = [
     places: ["Ciudad de Vorten", "Minas de Hierro Rojo", "Paso del Acuerdo Roto", "Fortaleza Colinar"]
   },
   {
-    id: "mar-norte", x: 85, y: 15, type: "danger", label: "Mar",
+    id: "puerto-libar", x: 80, y: 58, type: "city", label: "Puerto",
+    name: "Puerto de Libar",
+    short: "Un pueblo pequeño con un palacio que no olvidarás.",
+    stats: { Población: "~8,000", Clima: "Marino", Fundación: "Año 312" },
+    desc: `<em>Puerto de Libar</em> es un pueblo pesquero pequeño y tranquilo, conocido en toda la costa este por una sola razón: su palacio.<br><br>El <em>Palacio de Libar</em> es desproporcionadamente grandioso para el tamaño del pueblo. Sus torres de mármol blanco y sus ventanales de vidrio coloreado brillan desde el mar como un faro. Nadie recuerda bien quién lo mandó construir, pero todos están de acuerdo en que quien lo hizo tenía más orgullo que tierra.`,
+    lore: `"En Libar hay más palacio que pueblo. Dicen que el arquitecto era de Aethrion y que construyó el doble de lo pedido por rencor. El señor lo ejecutó. El palacio sigue en pie."`,
+    places: ["Palacio de Libar", "Puerto Pesquero", "La Plaza de los Colores", "Torre del Faro Antiguo"]
+  },
+  {
     name: "Mar del Norte",
     short: "Aguas de tormentas eternas.",
     stats: { Peligro: "Muy Alto", Clima: "Tormentas permanentes", Navegación: "Casi imposible" },
@@ -952,10 +960,10 @@ const locations = [
   {
     id: "mar-oeste", x: 8, y: 62, type: "danger", label: "Mar",
     name: "Mar del Oeste",
-    short: "Donde vive el guardián de tentáculos.",
+    short: "Aguas que pocos se atreven a cruzar.",
     stats: { Peligro: "Extremo", Clima: "Tormentoso", Comercio: "Bloqueado" },
-    desc: `El <em>Mar del Oeste</em> estaría abierto al comercio si no fuera por el ser que habita la Roca del Guardián. La criatura de tentáculos ha hundido más de doscientos barcos en tres siglos.<br><br>Darvanis ha ofrecido fortunas por su cabeza. Nadie ha regresado con ella.`,
-    lore: `"El Guardián no ataca por hambre. Ataca por territorio. Nadie sabe cuál es la ofrenda correcta para pasar."`,
+    desc: `El <em>Mar del Oeste</em> es una frontera natural que ningún reino ha logrado dominar. Sus corrientes impredecibles y sus tormentas repentinas han frustrado a las flotas más experimentadas.<br><br>Las pocas rutas que existían fueron abandonadas hace generaciones. Nadie sabe con certeza qué hay más allá.`,
+    lore: `"El Mar del Oeste no necesita guardianes. Se defiende solo."`,
     places: ["Roca del Guardián", "Lomír (pueblo costero)", "Bahía del Naufragio"]
   }
 ];
