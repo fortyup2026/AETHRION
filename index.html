@@ -11,9 +11,8 @@
     --gold-light: #f0d080;
     --gold-dark: #8a6a1a;
     --dark: #0a0804;
-    --parchment: #1a1408;
     --glow: rgba(201,168,76,0.4);
-    --panel-bg: rgba(10,8,4,0.92);
+    --panel-bg: rgba(10,8,4,0.95);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,7 +27,6 @@
     cursor: crosshair;
   }
 
-  /* ── MAP CONTAINER ── */
   #map-wrap {
     position: relative;
     width: 100%;
@@ -40,7 +38,6 @@
     position: absolute;
     top: 0; left: 0;
     transform-origin: 0 0;
-    transition: transform 0.1s ease-out;
     will-change: transform;
   }
 
@@ -53,6 +50,35 @@
     filter: brightness(0.92) contrast(1.05);
   }
 
+  /* ── ROUTES SVG ── */
+  #routes-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 900px;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .route-path {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+    opacity: 0.5;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 3px rgba(201,168,76,0.6));
+    animation: dash-flow 20s linear infinite;
+  }
+
+  .route-path.danger {
+    stroke: #cc4444;
+    filter: drop-shadow(0 0 3px rgba(204,68,68,0.6));
+  }
+
+  @keyframes dash-flow {
+    to { stroke-dashoffset: -200; }
+  }
+
   /* ── HOTSPOTS ── */
   .hotspot {
     position: absolute;
@@ -60,7 +86,6 @@
     cursor: pointer;
     z-index: 10;
     transform: translate(-50%, -50%);
-    transition: all 0.25s ease;
   }
 
   .hotspot-ring {
@@ -85,23 +110,24 @@
     z-index: 2;
   }
 
-  .hotspot:hover .hotspot-ring {
+  .hotspot:hover .hotspot-ring,
+  .hotspot:active .hotspot-ring {
     opacity: 1;
     transform: scale(1);
     animation: pulse-ring 1.5s ease-in-out infinite;
   }
 
-  .hotspot:hover .hotspot-dot {
+  .hotspot:hover .hotspot-dot,
+  .hotspot:active .hotspot-dot {
     transform: scale(1.4);
     box-shadow: 0 0 16px var(--gold), 0 0 32px var(--glow);
   }
 
-  /* Capital special */
   .hotspot.capital .hotspot-dot {
     width: 20px;
     height: 20px;
     background: radial-gradient(circle, #fff5c0 0%, var(--gold-light) 40%, var(--gold) 80%);
-    box-shadow: 0 0 12px var(--gold), 0 0 24px var(--gold), 0 0 40px var(--glow);
+    animation: capital-glow 2.5s ease-in-out infinite;
   }
 
   @keyframes pulse-ring {
@@ -114,8 +140,70 @@
     50% { box-shadow: 0 0 20px var(--gold-light), 0 0 40px var(--gold), 0 0 60px var(--glow); }
   }
 
-  .hotspot.capital .hotspot-dot {
-    animation: capital-glow 2.5s ease-in-out infinite;
+  /* ── DANGER ZONE ANIMATIONS ── */
+  .danger-aura {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+  }
+
+  .danger-aura-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(204,34,34,0.4);
+    animation: danger-expand 3s ease-out infinite;
+  }
+
+  .danger-aura-ring:nth-child(2) { animation-delay: 1s; }
+  .danger-aura-ring:nth-child(3) { animation-delay: 2s; }
+
+  @keyframes danger-expand {
+    0% { width: 20px; height: 20px; opacity: 0.8; margin: -10px; }
+    100% { width: 80px; height: 80px; opacity: 0; margin: -40px; }
+  }
+
+  /* ── LIGHTNING (Tierras Heladas / Mar del Norte) ── */
+  .lightning-container {
+    position: absolute;
+    pointer-events: none;
+    z-index: 6;
+    transform: translate(-50%, -50%);
+  }
+
+  .lightning-bolt {
+    position: absolute;
+    width: 2px;
+    background: linear-gradient(180deg, rgba(150,180,255,0.9), transparent);
+    transform-origin: top center;
+    animation: lightning-flash 4s ease-in-out infinite;
+    border-radius: 1px;
+  }
+
+  @keyframes lightning-flash {
+    0%, 85%, 100% { opacity: 0; }
+    87% { opacity: 1; }
+    89% { opacity: 0.3; }
+    91% { opacity: 1; }
+    93% { opacity: 0; }
+  }
+
+  /* ── FOG PARTICLES ── */
+  .fog-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,220,255,0.15), transparent);
+    pointer-events: none;
+    z-index: 7;
+    animation: fog-drift linear infinite;
+  }
+
+  @keyframes fog-drift {
+    0% { transform: translate(0, 0) scale(1); opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 0.6; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(1.5); opacity: 0; }
   }
 
   /* ── TOOLTIP ── */
@@ -140,7 +228,7 @@
     border-top: 2px solid var(--gold);
     padding: 14px 18px;
     backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.8), 0 0 0 1px rgba(201,168,76,0.1), inset 0 1px 0 rgba(201,168,76,0.2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.8), inset 0 1px 0 rgba(201,168,76,0.2);
     clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
   }
 
@@ -160,27 +248,15 @@
     font-weight: 900;
     color: var(--gold-light);
     line-height: 1.2;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     text-shadow: 0 0 20px var(--glow);
   }
 
   .tooltip-desc {
     font-size: 13px;
     color: #b8a060;
-    line-height: 1.6;
+    line-height: 1.5;
     font-style: italic;
-  }
-
-  .tooltip-tag {
-    display: inline-block;
-    margin-top: 8px;
-    font-family: 'Cinzel', serif;
-    font-size: 8px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--dark);
-    background: var(--gold-dark);
-    padding: 2px 8px;
   }
 
   /* ── DETAIL PANEL ── */
@@ -242,9 +318,7 @@
 
   .panel-body { padding: 24px 28px; }
 
-  .panel-section {
-    margin-bottom: 24px;
-  }
+  .panel-section { margin-bottom: 24px; }
 
   .panel-section-title {
     font-family: 'Cinzel', serif;
@@ -363,10 +437,34 @@
   }
   .ctrl-btn:hover { background: var(--gold-dark); color: var(--dark); }
 
+  /* ── MUSIC BUTTON ── */
+  #music-btn {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    z-index: 50;
+    width: 44px; height: 44px;
+    background: var(--panel-bg);
+    border: 1px solid var(--gold-dark);
+    color: var(--gold);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(201,168,76,0.2);
+  }
+  #music-btn:hover { background: var(--gold-dark); color: var(--dark); box-shadow: 0 0 20px rgba(201,168,76,0.4); }
+  #music-btn.playing { border-color: var(--gold); box-shadow: 0 0 16px var(--glow); animation: music-pulse 2s ease-in-out infinite; }
+
+  @keyframes music-pulse {
+    0%, 100% { box-shadow: 0 0 16px var(--glow); }
+    50% { box-shadow: 0 0 28px rgba(201,168,76,0.6); }
+  }
+
   /* ── LEGEND ── */
   #legend {
     position: fixed;
-    bottom: 24px; right: 24px;
+    bottom: 80px; right: 24px;
     z-index: 50;
     background: var(--panel-bg);
     border: 1px solid var(--gold-dark);
@@ -405,7 +503,7 @@
   .ld-region { background: radial-gradient(circle, #7aad9a, #3a6b5a); }
   .ld-danger { background: radial-gradient(circle, #d44, #922); }
 
-  /* ── LOADING SCREEN ── */
+  /* ── LOADING ── */
   #loading {
     position: fixed;
     inset: 0;
@@ -456,9 +554,7 @@
     animation: loading-sweep 1.8s ease-in-out infinite;
   }
 
-  @keyframes loading-sweep {
-    to { left: 100%; }
-  }
+  @keyframes loading-sweep { to { left: 100%; } }
 
   @keyframes flicker {
     0%, 100% { opacity: 1; }
@@ -469,7 +565,21 @@
     97% { opacity: 1; }
   }
 
-  /* Scrollbar */
+  /* ── CLICK RIPPLE ── */
+  .click-ripple {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    pointer-events: none;
+    z-index: 20;
+    transform: translate(-50%, -50%) scale(0);
+    animation: ripple-out 0.6s ease-out forwards;
+  }
+
+  @keyframes ripple-out {
+    to { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+  }
+
   #panel::-webkit-scrollbar { width: 4px; }
   #panel::-webkit-scrollbar-track { background: transparent; }
   #panel::-webkit-scrollbar-thumb { background: var(--gold-dark); }
@@ -495,7 +605,8 @@
 <div id="map-wrap">
   <div id="map-stage">
     <img id="map-img" src="map.png" alt="Mapa de Cetrios" draggable="false">
-    <!-- HOTSPOTS injected by JS -->
+    <!-- Routes SVG -->
+    <svg id="routes-svg"></svg>
   </div>
 </div>
 
@@ -505,7 +616,6 @@
     <div class="tooltip-type" id="tt-type"></div>
     <div class="tooltip-name" id="tt-name"></div>
     <div class="tooltip-desc" id="tt-desc"></div>
-    <div class="tooltip-tag" id="tt-tag"></div>
   </div>
 </div>
 
@@ -521,10 +631,13 @@
 
 <!-- CONTROLS -->
 <div id="controls">
-  <button class="ctrl-btn" onclick="zoom(1.2)" title="Acercar">+</button>
-  <button class="ctrl-btn" onclick="zoom(0.8)" title="Alejar">−</button>
-  <button class="ctrl-btn" onclick="resetView()" title="Restablecer" style="font-size:13px;letter-spacing:0">⌂</button>
+  <button class="ctrl-btn" onclick="zoom(1.2)">+</button>
+  <button class="ctrl-btn" onclick="zoom(0.8)">−</button>
+  <button class="ctrl-btn" onclick="resetView()" style="font-size:13px">⌂</button>
 </div>
+
+<!-- MUSIC BTN -->
+<button id="music-btn" onclick="toggleMusic()" title="Música de ambiente">♪</button>
 
 <!-- LEGEND -->
 <div id="legend">
@@ -536,210 +649,407 @@
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════
-//  LOCATIONS DATA
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  AUDIO ENGINE (Web Audio API — sin archivos externos)
+// ══════════════════════════════════════════════
+let audioCtx = null;
+let musicNodes = [];
+let musicPlaying = false;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function createAmbientMusic() {
+  if (!audioCtx) return;
+  stopMusic();
+
+  const master = audioCtx.createGain();
+  master.gain.setValueAtTime(0, audioCtx.currentTime);
+  master.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + 3);
+  master.connect(audioCtx.destination);
+
+  // Reverb
+  const convolver = audioCtx.createConvolver();
+  const reverbLen = audioCtx.sampleRate * 4;
+  const reverbBuf = audioCtx.createBuffer(2, reverbLen, audioCtx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = reverbBuf.getChannelData(c);
+    for (let i = 0; i < reverbLen; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / reverbLen, 2.5);
+  }
+  convolver.buffer = reverbBuf;
+
+  const reverbGain = audioCtx.createGain();
+  reverbGain.gain.value = 0.5;
+  convolver.connect(reverbGain);
+  reverbGain.connect(master);
+
+  // Drone notes — modal fantasy scale
+  const droneFreqs = [55, 82.4, 110, 146.8];
+  droneFreqs.forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = 0.06 - i * 0.01;
+    osc.connect(gain);
+    gain.connect(master);
+    gain.connect(convolver);
+    osc.start();
+    musicNodes.push(osc, gain);
+  });
+
+  // Slow melodic arpeggio
+  const melodyNotes = [220, 261.6, 293.7, 329.6, 392, 440, 329.6, 261.6];
+  let noteIndex = 0;
+  function playNote() {
+    if (!musicPlaying) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = melodyNotes[noteIndex % melodyNotes.length];
+    const now = audioCtx.currentTime;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.07, now + 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+    osc.connect(gain);
+    gain.connect(convolver);
+    osc.start(now);
+    osc.stop(now + 2.5);
+    noteIndex++;
+    setTimeout(playNote, 2200 + Math.random() * 800);
+  }
+
+  // Wind noise
+  const windBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * 3, audioCtx.sampleRate);
+  const windData = windBuf.getChannelData(0);
+  for (let i = 0; i < windData.length; i++) windData[i] = Math.random() * 2 - 1;
+  const windSource = audioCtx.createBufferSource();
+  windSource.buffer = windBuf;
+  windSource.loop = true;
+  const windFilter = audioCtx.createBiquadFilter();
+  windFilter.type = 'bandpass';
+  windFilter.frequency.value = 400;
+  windFilter.Q.value = 0.3;
+  const windGain = audioCtx.createGain();
+  windGain.gain.value = 0.04;
+  windSource.connect(windFilter);
+  windFilter.connect(windGain);
+  windGain.connect(master);
+  windSource.start();
+  musicNodes.push(windSource, windFilter, windGain);
+
+  musicNodes.push(master, convolver, reverbGain);
+  setTimeout(playNote, 1000);
+}
+
+function stopMusic() {
+  musicNodes.forEach(n => { try { n.stop ? n.stop() : null; n.disconnect(); } catch(e){} });
+  musicNodes = [];
+}
+
+function toggleMusic() {
+  initAudio();
+  const btn = document.getElementById('music-btn');
+  if (musicPlaying) {
+    stopMusic();
+    musicPlaying = false;
+    btn.classList.remove('playing');
+    btn.innerHTML = '♪';
+    btn.title = 'Activar música';
+  } else {
+    musicPlaying = true;
+    createAmbientMusic();
+    btn.classList.add('playing');
+    btn.innerHTML = '♬';
+    btn.title = 'Silenciar música';
+  }
+}
+
+// ── CLICK SOUND
+function playClickSound() {
+  initAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(660, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 0.3);
+  gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.35);
+}
+
+// ── HOVER SOUND
+function playHoverSound() {
+  initAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = 880;
+  gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.15);
+}
+
+// ══════════════════════════════════════════════
+//  LOCATIONS
+// ══════════════════════════════════════════════
 const locations = [
   {
-    id: "aethrion",
-    x: 50, y: 44, // percent of image
-    type: "capital",
-    label: "Capital",
+    id: "aethrion", x: 50, y: 44, type: "capital", label: "Capital",
     name: "Aethrion",
     short: "El corazón palpitante de Cetrios.",
-    tag: "Capital de Cetrios",
     stats: { Población: "~800,000", Clima: "Templado", Fundación: "Año 0" },
     desc: `<em>Aethrion</em> es la ciudad más antigua y poderosa del mundo conocido. Sus anillos concéntricos no son meros muros, sino capas de historia sedimentada durante milenios.<br><br>En su centro, la Torre del Alba toca las nubes y se dice que fue forjada por los Primeros, seres de magia pura que precedieron a las razas actuales.`,
     lore: `"Desde el amanecer del mundo hasta su último crepúsculo, Aethrion permanecerá. No porque sus piedras sean eternas, sino porque lleva en su corazón el primer nombre que el mundo pronunció."`,
     places: ["La Torre del Alba", "El Mercado de los Siete Velos", "Las Catacumbas del Olvido", "Puerta de los Antiguos"]
   },
   {
-    id: "velmor",
-    x: 34, y: 24,
-    type: "city",
-    label: "Reino",
+    id: "velmor", x: 34, y: 24, type: "city", label: "Reino",
     name: "Velmor",
     short: "El reino de las montañas del norte.",
-    tag: "Reino del Norte",
     stats: { Población: "~120,000", Clima: "Glacial" },
     desc: `<em>Velmor</em> es un reino forjado en roca y frío. Sus habitantes, los Velmori, son guerreros conocidos por su resistencia sobrehumana al dolor y al clima extremo.<br><br>Las torres de piedra negra son famosas en todo Cetrios por su arquitectura imposible, construidas sin mortero gracias a técnicas perdidas.`,
     lore: `"En Velmor no se llora por los muertos. Se cantan sus nombres durante cuarenta días hasta que el viento los lleva a las Tierras Heladas."`,
     places: ["Fortaleza Negra", "Minas de Glacianita", "El Foso del Juramento", "Pestro de Hielo"]
   },
   {
-    id: "darvanis",
-    x: 21, y: 52,
-    type: "city",
-    label: "Ciudad-Estado",
+    id: "darvanis", x: 21, y: 52, type: "city", label: "Ciudad-Estado",
     name: "Darvanis",
     short: "Ciudad de los mercaderes y los secretos.",
-    tag: "Ciudad-Estado del Oeste",
     stats: { Población: "~90,000", Clima: "Oceánico", Comercio: "Muy Alto" },
     desc: `<em>Darvanis</em> nunca fue conquistada por la fuerza. En cambio, compra lo que necesita y vende lo que sobra. Su red de espías es considerada la más efectiva del continente.<br><br>Bajo sus calles adoquinadas existe un laberinto de túneles donde se tratan los negocios que no deben ver la luz del sol.`,
     lore: `"Si quieres saber el secreto de un rey, pregunta en Darvanis. Si quieres guardar un secreto de por vida, jamás pongas pie en ella."`,
     places: ["La Bolsa Negra", "Puerto del Contrabando", "Torre de los Gremios", "Roca del Guardián"]
   },
   {
-    id: "bosque-korvan",
-    x: 62, y: 22,
-    type: "region",
-    label: "Región",
+    id: "bosque-korvan", x: 62, y: 22, type: "region", label: "Región",
     name: "Bosque de Korvan",
     short: "El bosque que respira y recuerda.",
-    tag: "Bosque Antiguo",
     stats: { Clima: "Húmedo", Acceso: "Restringido", Secretos: "Muchos" },
     desc: `Los árboles de <em>Korvan</em> no son árboles normales. Tienen siglos de memoria almacenada en sus raíces, y el Claro del Eco en su centro amplifica los pensamientos hasta volverse audibles.<br><br>Se dice que quien encuentra el árbol central del bosque puede hablar con los muertos una sola vez.`,
     lore: `"No entres en Korvan cuando la luna esté nueva. El bosque pierde su cordura sin la luz plateada para guiarlo."`,
     places: ["Claro del Eco", "El Árbol Madre", "Senda de los Susurros", "Lago Espejo"]
   },
   {
-    id: "tierras-heladas",
-    x: 50, y: 6,
-    type: "danger",
-    label: "Zona Prohibida",
+    id: "tierras-heladas", x: 50, y: 6, type: "danger", label: "Zona Prohibida",
     name: "Tierras Heladas",
     short: "Más allá del norte no hay retorno.",
-    tag: "Tierra Prohibida",
     stats: { Peligro: "Extremo", Clima: "-60°C / -80°C", Exploradores: "Ninguno volvió" },
     desc: `Nadie sabe qué hay más allá de las <em>Tierras Heladas</em>. Las expediciones enviadas por Aethrion nunca regresaron. Los mapas terminan aquí, pero los miedos no.<br><br>Algunas leyendas hablan de una ciudad de cristal negro donde habitan seres de la Era Anterior, esperando el momento de regresar.`,
-    lore: `"Tres expediciones mandé al norte. La primera volvió sin sus líderes. La segunda volvió sin nadie. La tercera... la tercera nunca debió partir." — Archivista Maren, último registro conocido`,
+    lore: `"Tres expediciones mandé al norte. La primera volvió sin sus líderes. La segunda volvió sin nadie. La tercera... la tercera nunca debió partir." — Archivista Maren`,
     places: ["El Muro de Hielo", "Ciudad de Cristal (leyenda)", "El Abismo Sin Nombre"]
   },
   {
-    id: "islas-tronox",
-    x: 84, y: 36,
-    type: "region",
-    label: "Archipiélago",
+    id: "islas-tronox", x: 84, y: 36, type: "region", label: "Archipiélago",
     name: "Islas de Tronox",
     short: "Reinos insulares de piratas y magos.",
-    tag: "Archipiélago del Este",
     stats: { Población: "~45,000", Clima: "Marino", Comercio: "Marítimo" },
     desc: `Las <em>Islas de Tronox</em> son un archipiélago gobernado por el Consejo de Capitanes, donde la ley la impone quien tiene el cañón más grande.<br><br>Tronox Mayor alberga la Academia de Magos del Mar, mientras que Tronox Menor es conocida por sus mercados de artefactos robados.`,
     lore: `"En Tronox no se piden papeles. Se pide oro. Si no tienes oro, ofreces algo de igual valor: información, sangre, o silencio."`,
     places: ["Puerto Mayor de Tronox", "Academia del Mar", "Tronox Menor", "Arrecife de los Naufragios"]
   },
   {
-    id: "valle-arden",
-    x: 50, y: 68,
-    type: "region",
-    label: "Valle",
+    id: "valle-arden", x: 50, y: 68, type: "region", label: "Valle",
     name: "Valle de Arden",
     short: "El granero del mundo y campo de batallas eternas.",
-    tag: "Corazón de Cetrios",
     stats: { Clima: "Templado", Batallas: "47 documentadas", Agua: "Abundante" },
-    desc: `El <em>Valle de Arden</em> es fértil y hermoso, lo que lo convierte en el lugar más disputado de la historia. Cada gran guerra de Cetrios tuvo su batalla decisiva aquí.<br><br>El río central, el Arden, corre teñido de un leve tono rojizo por el alto contenido mineral del suelo... o eso dicen los geógrafos.`,
+    desc: `El <em>Valle de Arden</em> es fértil y hermoso, lo que lo convierte en el lugar más disputado de la historia. Cada gran guerra de Cetrios tuvo su batalla decisiva aquí.<br><br>El río central corre con un leve tono rojizo por el alto contenido mineral del suelo... o eso dicen los geógrafos.`,
     lore: `"El Valle de Arden florece cada primavera sin importar cuánta sangre haya bebido el otoño anterior. La tierra no olvida. La tierra transforma."`,
     places: ["Puente Roto de Liedor", "Cruce de Cicus", "Molinos del Sur", "El Campo Sin Nombre"]
   },
   {
-    id: "lagos-eldra",
-    x: 30, y: 68,
-    type: "region",
-    label: "Región Lacustre",
+    id: "lagos-eldra", x: 30, y: 68, type: "region", label: "Región Lacustre",
     name: "Lagos de Eldra",
     short: "Aguas que guardan secretos milenarios.",
-    tag: "Región del Suroeste",
     stats: { Peligro: "Moderado", Clima: "Húmedo", Pesca: "Excepcional" },
-    desc: `Los <em>Lagos de Eldra</em> son cinco cuerpos de agua interconectados que comparten el mismo sistema de corrientes subterráneas. Se dice que si hablas tu nombre sobre el agua, los peces te recordarán para siempre.<br><br>Puerto de Eldra es la ciudad más importante de la región, famosa por sus barcos de fondo de cristal.`,
+    desc: `Los <em>Lagos de Eldra</em> son cinco cuerpos de agua interconectados. Se dice que si hablas tu nombre sobre el agua, los peces te recordarán para siempre.<br><br>Puerto de Eldra es la ciudad más importante de la región, famosa por sus barcos de fondo de cristal.`,
     lore: `"Las aguas de Eldra nunca están quietas del todo. Incluso en los días de mayor calma, algo se mueve en sus profundidades, algo viejo, algo paciente."`,
     places: ["Puerto de Eldra", "Puerto Inlet", "Roca del Guardián", "El Quinto Lago (sin nombre)"]
   },
   {
-    id: "desierto-kael",
-    x: 70, y: 82,
-    type: "region",
-    label: "Desierto",
+    id: "desierto-kael", x: 70, y: 82, type: "region", label: "Desierto",
     name: "Desierto de Kael",
     short: "El horno del sur donde duerme el Murmee.",
-    tag: "Sur Lejano",
     stats: { Peligro: "Muy Alto", Clima: "+55°C", Agua: "Escasa" },
-    desc: `El <em>Desierto de Kael</em> oculta bajo sus arenas las ruinas de la primera civilización de Cetrios. Las pirámides de Botnas son solo la parte visible de una ciudad enterrada que se extiende kilómetros bajo la superficie.<br><br>Y en algún lugar de esa ciudad duerme el <em>Murmee</em>, una entidad antigua que nadie ha podido identificar con claridad.`,
+    desc: `El <em>Desierto de Kael</em> oculta bajo sus arenas las ruinas de la primera civilización de Cetrios. Las pirámides de Botnas son solo la parte visible de una ciudad enterrada que se extiende kilómetros bajo la superficie.<br><br>Y en algún lugar duerme el <em>Murmee</em>, una entidad antigua que nadie ha podido identificar.`,
     lore: `"Las pirámides de Botnas no fueron construidas para honrar a los muertos. Fueron construidas para mantener algo enterrado. Hay una diferencia crucial."`,
     places: ["Pirámides de Botnas", "Botnas de Kael", "El Murmee Dormido", "Ciudadela Enterrada"]
   },
   {
-    id: "serynth",
-    x: 46, y: 88,
-    type: "city",
-    label: "Ciudad",
+    id: "serynth", x: 46, y: 88, type: "city", label: "Ciudad",
     name: "Serynth",
     short: "La ciudad de los artistas y los exiliados.",
-    tag: "Ciudad del Sur",
     stats: { Población: "~60,000", Clima: "Cálido", Arte: "Excepcional" },
     desc: `<em>Serynth</em> es el destino elegido por aquellos que no encajan en ningún otro lugar. Sus calles están llenas de músicos, pintores, alquimistas y fugitivos de alta alcurnia.<br><br>La ciudad no tiene ejército propio, pero tampoco nadie ha intentado conquistarla dos veces.`,
-    lore: `"Serynth no tiene murallas porque no las necesita. Sus defensas son más sutiles: nadie que haya venido aquí a buscar paz ha querido traer guerra después."`,
+    lore: `"Serynth no tiene murallas porque no las necesita. Nadie que haya venido aquí a buscar paz ha querido traer guerra después."`,
     places: ["Teatro del Último Acto", "Mercado de las Memorias", "La Torre Incompleta", "Puerto Serynth"]
   },
   {
-    id: "colinas-vorlen",
-    x: 68, y: 58,
-    type: "region",
-    label: "Región",
+    id: "colinas-vorlen", x: 68, y: 58, type: "region", label: "Región",
     name: "Colinas de Vorlen",
     short: "Tierras de viejas alianzas y nuevas traiciones.",
-    tag: "Región del Sureste",
     stats: { Población: "~35,000", Clima: "Continental", Minería: "Alta" },
-    desc: `Las <em>Colinas de Vorlen</em> son ricas en minerales y pobres en estabilidad política. Cada colina parece tener su propio señor, su propia ley y su propia historia de agravios.<br><br>Vorten, la ciudad principal, intenta mantener el orden pero los señores colinos rara vez escuchan a alguien que vive en una llanura.`,
+    desc: `Las <em>Colinas de Vorlen</em> son ricas en minerales y pobres en estabilidad política. Cada colina parece tener su propio señor, su propia ley y su propia historia de agravios.<br><br>Vorten, la ciudad principal, intenta mantener el orden pero los señores colinos rara vez escuchan.`,
     lore: `"Los Vorleni se saludan preguntando quién es el enemigo del otro. Es su forma de hacer amigos."`,
     places: ["Ciudad de Vorten", "Minas de Hierro Rojo", "Paso del Acuerdo Roto", "Fortaleza Colinar"]
   },
   {
-    id: "mar-norte",
-    x: 85, y: 15,
-    type: "danger",
-    label: "Mar",
+    id: "mar-norte", x: 85, y: 15, type: "danger", label: "Mar",
     name: "Mar del Norte",
     short: "Aguas de tormentas eternas.",
-    tag: "Aguas del Norte",
     stats: { Peligro: "Muy Alto", Clima: "Tormentas permanentes", Navegación: "Casi imposible" },
-    desc: `El <em>Mar del Norte</em> es conocido por sus tormentas que nunca cesan completamente. Los navegantes más experimentados evitan estas aguas entre los meses de sombra.<br><br>Se dice que bajo sus olas existe un cementerio de navíos tan grande como una ciudad, y que sus fantasmas aún intentan encontrar el camino a casa.`,
+    desc: `El <em>Mar del Norte</em> es conocido por sus tormentas que nunca cesan. Los navegantes más experimentados evitan estas aguas entre los meses de sombra.<br><br>Bajo sus olas existe un cementerio de navíos tan grande como una ciudad, y sus fantasmas aún intentan encontrar el camino a casa.`,
     lore: `"El Mar del Norte no se navega. Se sobrevive."`,
     places: ["El Remolino Eterno", "Ruta de los Valientes (abandonada)", "Cementerio de Navíos"]
   },
   {
-    id: "mar-oeste",
-    x: 8, y: 62,
-    type: "danger",
-    label: "Mar",
+    id: "mar-oeste", x: 8, y: 62, type: "danger", label: "Mar",
     name: "Mar del Oeste",
     short: "Donde vive el guardián de tentáculos.",
-    tag: "Aguas del Oeste",
     stats: { Peligro: "Extremo", Clima: "Tormentoso", Comercio: "Bloqueado" },
-    desc: `El <em>Mar del Oeste</em> estaría abierto al comercio si no fuera por el ser que habita la Roca del Guardián. La criatura de tentáculos ha hundido más de doscientos barcos en los últimos tres siglos.<br><br>Darvanis ha ofrecido fortunas por la cabeza del monstruo. Nadie ha regresado con ella.`,
-    lore: `"El Guardián no ataca por hambre. Ataca por territorio. Hay quienes dicen que si llevas la ofrenda correcta, te deja pasar. Nadie sabe cuál es la ofrenda correcta."`,
+    desc: `El <em>Mar del Oeste</em> estaría abierto al comercio si no fuera por el ser que habita la Roca del Guardián. La criatura de tentáculos ha hundido más de doscientos barcos en tres siglos.<br><br>Darvanis ha ofrecido fortunas por su cabeza. Nadie ha regresado con ella.`,
+    lore: `"El Guardián no ataca por hambre. Ataca por territorio. Nadie sabe cuál es la ofrenda correcta para pasar."`,
     places: ["Roca del Guardián", "Lomír (pueblo costero)", "Bahía del Naufragio"]
   }
 ];
 
-// ══════════════════════════════════════════════════════
-//  DOM SETUP
-// ══════════════════════════════════════════════════════
+// ── ROUTES (from → to, as % coords)
+const routes = [
+  { from: "aethrion", to: "velmor", type: "normal" },
+  { from: "aethrion", to: "darvanis", type: "normal" },
+  { from: "aethrion", to: "bosque-korvan", type: "normal" },
+  { from: "aethrion", to: "valle-arden", type: "normal" },
+  { from: "aethrion", to: "colinas-vorlen", type: "normal" },
+  { from: "velmor", to: "tierras-heladas", type: "danger" },
+  { from: "darvanis", to: "lagos-eldra", type: "normal" },
+  { from: "valle-arden", to: "serynth", type: "normal" },
+  { from: "valle-arden", to: "desierto-kael", type: "normal" },
+  { from: "colinas-vorlen", to: "islas-tronox", type: "normal" },
+  { from: "darvanis", to: "mar-oeste", type: "danger" },
+  { from: "velmor", to: "mar-norte", type: "danger" },
+];
+
+// ══════════════════════════════════════════════
+//  DOM & MAP SETUP
+// ══════════════════════════════════════════════
 const stage = document.getElementById('map-stage');
 const mapImg = document.getElementById('map-img');
 const tooltip = document.getElementById('tooltip');
 const panel = document.getElementById('panel');
+const routesSvg = document.getElementById('routes-svg');
 
 let scale = 1, posX = 0, posY = 0;
 let isDragging = false, startX, startY;
+let mapH = 1100;
 
-// ── Create hotspots after image loads
+function getLocById(id) { return locations.find(l => l.id === id); }
+
+function locPx(loc) {
+  return { x: loc.x / 100 * 900, y: loc.y / 100 * mapH };
+}
+
 mapImg.onload = function() {
-  const iw = mapImg.naturalWidth;
-  const ih = mapImg.naturalHeight;
+  const iw = mapImg.naturalWidth || 900;
+  const ih = mapImg.naturalHeight || 1100;
+  mapH = 900 * ih / iw;
+  routesSvg.setAttribute('height', mapH + 'px');
 
+  // Draw routes
+  routes.forEach(r => {
+    const a = getLocById(r.from);
+    const b = getLocById(r.to);
+    if (!a || !b) return;
+    const ax = locPx(a).x, ay = locPx(a).y;
+    const bx = locPx(b).x, by = locPx(b).y;
+    // Bezier control point
+    const cx = (ax + bx) / 2 + (by - ay) * 0.15;
+    const cy = (ay + by) / 2 - (bx - ax) * 0.15;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${ax} ${ay} Q ${cx} ${cy} ${bx} ${by}`);
+    path.setAttribute('class', 'route-path' + (r.type === 'danger' ? ' danger' : ''));
+    routesSvg.appendChild(path);
+  });
+
+  // Create hotspots
   locations.forEach(loc => {
+    const px = locPx(loc);
+
+    // Danger aura
+    if (loc.type === 'danger') {
+      const aura = document.createElement('div');
+      aura.className = 'danger-aura';
+      aura.style.left = px.x + 'px';
+      aura.style.top = px.y + 'px';
+      aura.style.width = '0'; aura.style.height = '0';
+      for (let i = 0; i < 3; i++) {
+        const ring = document.createElement('div');
+        ring.className = 'danger-aura-ring';
+        ring.style.animationDelay = (i * 1) + 's';
+        aura.appendChild(ring);
+      }
+      stage.appendChild(aura);
+
+      // Lightning for frozen / storm zones
+      if (loc.id === 'tierras-heladas' || loc.id === 'mar-norte') {
+        const lc = document.createElement('div');
+        lc.className = 'lightning-container';
+        lc.style.left = px.x + 'px';
+        lc.style.top = py = px.y + 'px';
+        for (let i = 0; i < 4; i++) {
+          const bolt = document.createElement('div');
+          bolt.className = 'lightning-bolt';
+          const len = 30 + Math.random() * 40;
+          bolt.style.height = len + 'px';
+          bolt.style.left = (Math.random() * 60 - 30) + 'px';
+          bolt.style.top = (Math.random() * 20 - 40) + 'px';
+          bolt.style.transform = `rotate(${Math.random() * 30 - 15}deg)`;
+          bolt.style.animationDelay = (Math.random() * 4) + 's';
+          bolt.style.animationDuration = (3 + Math.random() * 3) + 's';
+          lc.appendChild(bolt);
+        }
+        stage.appendChild(lc);
+      }
+
+      // Fog for frozen lands
+      if (loc.id === 'tierras-heladas') {
+        for (let i = 0; i < 6; i++) {
+          const fog = document.createElement('div');
+          fog.className = 'fog-particle';
+          const size = 40 + Math.random() * 60;
+          fog.style.width = size + 'px';
+          fog.style.height = size + 'px';
+          fog.style.left = (px.x + Math.random() * 100 - 50) + 'px';
+          fog.style.top = (px.y + Math.random() * 60 - 30) + 'px';
+          fog.style.setProperty('--dx', (Math.random() * 80 - 40) + 'px');
+          fog.style.setProperty('--dy', (Math.random() * -60 - 10) + 'px');
+          fog.style.animationDuration = (6 + Math.random() * 6) + 's';
+          fog.style.animationDelay = (Math.random() * 6) + 's';
+          stage.appendChild(fog);
+        }
+      }
+    }
+
+    // Hotspot dot
     const wrap = document.createElement('div');
     wrap.className = 'hotspot ' + (loc.type === 'capital' ? 'capital' : '');
-    wrap.style.left = (loc.x / 100 * 900) + 'px';
-    wrap.style.top = (loc.y / 100 * (900 * ih / iw)) + 'px';
+    wrap.style.left = px.x + 'px';
+    wrap.style.top = px.y + 'px';
 
     const ring = document.createElement('div');
     ring.className = 'hotspot-ring';
-
     const dot = document.createElement('div');
     dot.className = 'hotspot-dot';
 
-    // Danger zones: red dot
     if (loc.type === 'danger') {
       dot.style.background = 'radial-gradient(circle, #ff6666 0%, #cc2222 60%, transparent 100%)';
       dot.style.boxShadow = '0 0 8px #cc2222, 0 0 16px rgba(204,34,34,0.4)';
@@ -752,41 +1062,58 @@ mapImg.onload = function() {
     wrap.appendChild(dot);
     wrap.dataset.id = loc.id;
 
-    wrap.addEventListener('mouseenter', (e) => showTooltip(e, loc));
+    wrap.addEventListener('mouseenter', (e) => { showTooltip(e, loc); playHoverSound(); });
     wrap.addEventListener('mouseleave', hideTooltip);
-    wrap.addEventListener('mousemove', (e) => moveTooltip(e));
-    wrap.addEventListener('click', (e) => { e.stopPropagation(); openPanel(loc); });
+    wrap.addEventListener('mousemove', moveTooltip);
+    wrap.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playClickSound();
+      spawnRipple(e, wrap, px);
+      openPanel(loc);
+    });
+    wrap.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      playClickSound();
+      openPanel(loc);
+    });
 
     stage.appendChild(wrap);
   });
 
-  // Fit map to window
   fitMap();
-
-  // Hide loading screen
   setTimeout(() => {
     document.getElementById('loading').classList.add('done');
     setTimeout(() => document.getElementById('loading').remove(), 1000);
-  }, 1500);
+  }, 1600);
 };
 
-// If image already cached
 if (mapImg.complete) mapImg.onload();
+
+// ── RIPPLE EFFECT
+function spawnRipple(e, wrap, px) {
+  const ripple = document.createElement('div');
+  ripple.className = 'click-ripple';
+  ripple.style.width = '20px';
+  ripple.style.height = '20px';
+  ripple.style.left = px.x + 'px';
+  ripple.style.top = px.y + 'px';
+  stage.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 700);
+}
 
 // ── TOOLTIP
 function showTooltip(e, loc) {
   document.getElementById('tt-type').textContent = loc.label;
   document.getElementById('tt-name').textContent = loc.name;
   document.getElementById('tt-desc').textContent = loc.short;
-  document.getElementById('tt-tag').textContent = loc.tag;
   tooltip.classList.add('visible');
   moveTooltip(e);
 }
 
 function moveTooltip(e) {
-  const tw = 290, th = 120;
-  let x = e.clientX + 16;
-  let y = e.clientY + 16;
+  const tw = 290, th = 100;
+  let x = e.clientX + 16, y = e.clientY + 16;
   if (x + tw > window.innerWidth) x = e.clientX - tw - 16;
   if (y + th > window.innerHeight) y = e.clientY - th - 16;
   tooltip.style.left = x + 'px';
@@ -799,44 +1126,21 @@ function hideTooltip() { tooltip.classList.remove('visible'); }
 function openPanel(loc) {
   document.getElementById('p-type').textContent = loc.label;
   document.getElementById('p-name').textContent = loc.name;
-
   let html = '';
-
-  // Description
-  html += `<div class="panel-section">
-    <div class="panel-section-title">Descripción</div>
-    <p>${loc.desc}</p>
-  </div>`;
-
-  // Stats
+  html += `<div class="panel-section"><div class="panel-section-title">Descripción</div><p>${loc.desc}</p></div>`;
   if (loc.stats) {
-    html += `<div class="panel-section">
-      <div class="panel-section-title">Datos</div>
-      <div class="stat-grid">`;
+    html += `<div class="panel-section"><div class="panel-section-title">Datos</div><div class="stat-grid">`;
     Object.entries(loc.stats).forEach(([k, v]) => {
       html += `<div class="stat-item"><div class="stat-label">${k}</div><div class="stat-value">${v}</div></div>`;
     });
     html += `</div></div>`;
   }
-
-  // Lore quote
-  if (loc.lore) {
-    html += `<div class="panel-section">
-      <div class="panel-section-title">Crónicas</div>
-      <div class="lore-quote">${loc.lore}</div>
-    </div>`;
-  }
-
-  // Places
+  if (loc.lore) html += `<div class="panel-section"><div class="panel-section-title">Crónicas</div><div class="lore-quote">${loc.lore}</div></div>`;
   if (loc.places && loc.places.length) {
-    html += `<div class="panel-section">
-      <div class="panel-section-title">Lugares de Interés</div>`;
-    loc.places.forEach(p => {
-      html += `<p style="padding:4px 0;border-bottom:1px solid rgba(201,168,76,0.08);">◆ <em>${p}</em></p>`;
-    });
+    html += `<div class="panel-section"><div class="panel-section-title">Lugares de Interés</div>`;
+    loc.places.forEach(p => { html += `<p style="padding:4px 0;border-bottom:1px solid rgba(201,168,76,0.08);">◆ <em>${p}</em></p>`; });
     html += `</div>`;
   }
-
   document.getElementById('p-body').innerHTML = html;
   panel.classList.add('open');
 }
@@ -849,65 +1153,53 @@ function applyTransform() {
 }
 
 function fitMap() {
-  const iw = mapImg.naturalWidth || 900;
-  const ih = mapImg.naturalHeight || 1100;
-  const ww = window.innerWidth;
-  const wh = window.innerHeight;
-  scale = Math.min(ww / iw, wh / ih) * 0.95;
-  posX = (ww - iw * scale) / 2;
-  posY = (wh - ih * scale) / 2;
+  const iw = 900, ih = mapH || 1100;
+  scale = Math.min(window.innerWidth / iw, window.innerHeight / ih) * 0.95;
+  posX = (window.innerWidth - iw * scale) / 2;
+  posY = (window.innerHeight - ih * scale) / 2;
   applyTransform();
 }
 
 function zoom(factor) {
-  const cx = window.innerWidth / 2;
-  const cy = window.innerHeight / 2;
-  const before = { x: (cx - posX) / scale, y: (cy - posY) / scale };
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  const bx = (cx - posX) / scale, by = (cy - posY) / scale;
   scale = Math.max(0.3, Math.min(4, scale * factor));
-  posX = cx - before.x * scale;
-  posY = cy - before.y * scale;
+  posX = cx - bx * scale; posY = cy - by * scale;
   applyTransform();
 }
 
 function resetView() { fitMap(); }
 
-// Mouse pan
 const wrap = document.getElementById('map-wrap');
 wrap.addEventListener('mousedown', e => {
   if (e.target.closest('.hotspot')) return;
   isDragging = true;
-  startX = e.clientX - posX;
-  startY = e.clientY - posY;
+  startX = e.clientX - posX; startY = e.clientY - posY;
   wrap.style.cursor = 'grabbing';
 });
 window.addEventListener('mousemove', e => {
   if (!isDragging) return;
-  posX = e.clientX - startX;
-  posY = e.clientY - startY;
+  posX = e.clientX - startX; posY = e.clientY - startY;
   applyTransform();
 });
 window.addEventListener('mouseup', () => { isDragging = false; wrap.style.cursor = 'crosshair'; });
 
-// Wheel zoom
 wrap.addEventListener('wheel', e => {
   e.preventDefault();
   const factor = e.deltaY < 0 ? 1.1 : 0.9;
-  const before = { x: (e.clientX - posX) / scale, y: (e.clientY - posY) / scale };
+  const bx = (e.clientX - posX) / scale, by = (e.clientY - posY) / scale;
   scale = Math.max(0.3, Math.min(4, scale * factor));
-  posX = e.clientX - before.x * scale;
-  posY = e.clientY - before.y * scale;
+  posX = e.clientX - bx * scale; posY = e.clientY - by * scale;
   applyTransform();
 }, { passive: false });
 
-// Touch support
-let lastDist = 0, touches = [];
+let lastDist = 0;
 wrap.addEventListener('touchstart', e => {
-  touches = e.touches;
-  if (touches.length === 1) {
-    startX = touches[0].clientX - posX;
-    startY = touches[0].clientY - posY;
-  } else if (touches.length === 2) {
-    lastDist = Math.hypot(touches[1].clientX - touches[0].clientX, touches[1].clientY - touches[0].clientY);
+  if (e.touches.length === 1) {
+    startX = e.touches[0].clientX - posX;
+    startY = e.touches[0].clientY - posY;
+  } else if (e.touches.length === 2) {
+    lastDist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
   }
 }, { passive: true });
 
@@ -919,13 +1211,11 @@ wrap.addEventListener('touchmove', e => {
     applyTransform();
   } else if (e.touches.length === 2) {
     const dist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
-    const factor = dist / lastDist;
-    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    const before = { x: (cx - posX) / scale, y: (cy - posY) / scale };
-    scale = Math.max(0.3, Math.min(4, scale * factor));
-    posX = cx - before.x * scale;
-    posY = cy - before.y * scale;
+    const bx = ((e.touches[0].clientX + e.touches[1].clientX) / 2 - posX) / scale;
+    const by = ((e.touches[0].clientY + e.touches[1].clientY) / 2 - posY) / scale;
+    scale = Math.max(0.3, Math.min(4, scale * (dist / lastDist)));
+    posX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - bx * scale;
+    posY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - by * scale;
     lastDist = dist;
     applyTransform();
   }
