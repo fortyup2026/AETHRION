@@ -62,13 +62,13 @@ button{font-family:inherit}
 
 .spot-label{
   position:absolute;left:50%;top:15px;transform:translateX(-50%);
-  font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;
-  color:#f4e3ac;white-space:nowrap;padding:3px 8px;
+  font-family:'Cinzel',serif;font-size:13px;letter-spacing:1.25px;text-transform:uppercase;
+  color:#f4e3ac;white-space:nowrap;padding:6px 10px;border-radius:7px;
   background:rgba(4,3,1,.72);border:1px solid rgba(201,168,76,.28);
   text-shadow:0 2px 6px #000;opacity:0;transition:opacity .25s;pointer-events:none;
 }
 .show-labels .spot-label{opacity:1}
-.hotspot.capital .spot-label{opacity:1;font-size:10.5px;color:#fff1bd;border-color:rgba(201,168,76,.5)}
+.hotspot.capital .spot-label{opacity:1;font-size:14px;color:#fff1bd;border-color:rgba(201,168,76,.5)}
 .hotspot.active .mark i{box-shadow:0 0 20px #fff0aa,0 0 44px rgba(201,168,76,.8)}
 
 /* ---------- PANEL ---------- */
@@ -120,6 +120,44 @@ button{font-family:inherit}
 .p-nav button{flex:1;padding:11px 8px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.22);color:var(--gold2);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
 .p-nav button:active{background:rgba(201,168,76,.2)}
 
+/* ---------- VISTA CINEMÁTICA DEL LUGAR ---------- */
+#scene{
+  position:fixed;inset:0;z-index:70;overflow:hidden;background:#050403;
+  opacity:0;pointer-events:none;transition:opacity .34s ease;
+}
+#scene.open{opacity:1;pointer-events:auto}
+#scene-bg,#scene-mid,#scene-front,#scene-fx{position:absolute;inset:-3%;will-change:transform,opacity}
+#scene-bg{background-position:center;background-size:cover;transform:scale(1.04);transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
+#scene.open #scene-bg{transform:scale(1)}
+#scene-mid,#scene-front{pointer-events:none}
+#scene-fx{pointer-events:none;background:linear-gradient(180deg,rgba(4,3,2,.12),rgba(4,3,2,.08) 44%,rgba(4,3,2,.72));box-shadow:inset 0 0 180px #000}
+#scene-fx:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 54% 38%,transparent 0 30%,rgba(0,0,0,.28) 76%,rgba(0,0,0,.65));}
+#scene-fx:after{content:'';position:absolute;left:-10%;right:-10%;bottom:-6%;height:42%;background:linear-gradient(180deg,transparent,rgba(3,2,1,.92));filter:blur(10px)}
+.scene-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.scene-particles i{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(241,216,137,.4);box-shadow:0 0 12px rgba(241,216,137,.35);animation:floatDust var(--d,9s) linear infinite;opacity:.25}
+@keyframes floatDust{from{transform:translate3d(0,25vh,0)}to{transform:translate3d(var(--x,30px),-115vh,0)}}
+.scene-top{position:absolute;z-index:5;left:max(18px,env(safe-area-inset-left));right:max(18px,env(safe-area-inset-right));top:max(16px,env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.scene-back{border:1px solid rgba(241,216,137,.42);background:rgba(5,4,2,.62);color:#f6e6b7;padding:11px 14px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;backdrop-filter:blur(10px);cursor:pointer;border-radius:9px}
+.scene-card{position:absolute;z-index:6;left:max(20px,env(safe-area-inset-left));bottom:max(24px,env(safe-area-inset-bottom));width:min(680px,calc(100vw - 40px));padding:24px 26px;background:linear-gradient(110deg,rgba(6,4,2,.84),rgba(6,4,2,.48));border:1px solid rgba(201,168,76,.34);backdrop-filter:blur(16px);box-shadow:0 20px 70px rgba(0,0,0,.55);border-radius:16px}
+.scene-type{font-family:'Cinzel',serif;font-size:11px;letter-spacing:5px;color:#c9a84c;text-transform:uppercase}
+.scene-name{font-family:'Cinzel',serif;font-size:clamp(34px,6vw,72px);line-height:.92;font-weight:900;color:#f5df9c;margin-top:5px;text-shadow:0 5px 28px #000}
+.scene-short{font-size:clamp(17px,2.1vw,23px);line-height:1.42;color:#ddc78b;margin-top:12px;max-width:620px}
+.scene-enter{margin-top:17px;border:1px solid rgba(241,216,137,.5);background:rgba(201,168,76,.12);color:#f5df9c;padding:12px 15px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:8px}
+.scene-enter:hover{background:rgba(201,168,76,.22)}
+/* siluetas y profundidad */
+#scene-mid:before,#scene-front:before,#scene-front:after{content:'';position:absolute;left:-5%;right:-5%;bottom:-2%;transform-origin:bottom}
+.scene-forest #scene-mid:before{height:50%;background:repeating-linear-gradient(95deg,transparent 0 4%,rgba(6,10,7,.75) 4.5% 5.3%,transparent 5.8% 9%);clip-path:polygon(0 70%,4% 45%,7% 67%,11% 28%,15% 66%,19% 36%,23% 73%,29% 22%,35% 68%,42% 34%,48% 77%,54% 30%,61% 69%,67% 18%,73% 69%,80% 35%,87% 68%,93% 28%,100% 72%,100% 100%,0 100%);filter:blur(.2px)}
+.scene-forest #scene-front:before{height:36%;background:rgba(2,5,3,.96);clip-path:polygon(0 75%,7% 58%,13% 72%,20% 45%,28% 75%,36% 50%,44% 74%,53% 44%,62% 76%,70% 48%,78% 72%,86% 52%,93% 70%,100% 54%,100% 100%,0 100%)}
+.scene-city #scene-mid:before{height:48%;background:linear-gradient(90deg,#0b0907,#15100b 55%,#090706);clip-path:polygon(0 72%,4% 72%,4% 44%,10% 44%,10% 66%,14% 66%,14% 28%,20% 28%,20% 70%,24% 70%,24% 48%,29% 48%,29% 18%,34% 18%,34% 64%,40% 64%,40% 36%,45% 36%,45% 72%,51% 72%,51% 24%,58% 24%,58% 62%,63% 62%,63% 40%,69% 40%,69% 67%,75% 67%,75% 30%,81% 30%,81% 72%,86% 72%,86% 52%,91% 52%,91% 69%,96% 69%,96% 38%,100% 38%,100% 100%,0 100%)}
+.scene-city #scene-front:before{height:25%;background:#030201;clip-path:polygon(0 68%,10% 48%,19% 65%,29% 42%,42% 65%,53% 47%,66% 69%,79% 43%,90% 64%,100% 50%,100% 100%,0 100%)}
+.scene-desert #scene-mid:before{height:40%;background:linear-gradient(180deg,#8b5c2c,#2e190b);clip-path:polygon(0 60%,9% 44%,18% 62%,31% 37%,43% 65%,58% 36%,72% 62%,86% 41%,100% 60%,100% 100%,0 100%)}
+.scene-desert #scene-front:before{height:28%;background:#1b0e06;clip-path:polygon(0 62%,18% 45%,38% 66%,58% 48%,78% 70%,100% 50%,100% 100%,0 100%)}
+.scene-ice #scene-mid:before{height:52%;background:linear-gradient(180deg,#dce8e9,#49606c);clip-path:polygon(0 79%,8% 48%,15% 72%,25% 28%,34% 68%,45% 16%,54% 67%,64% 34%,73% 72%,84% 24%,92% 62%,100% 36%,100% 100%,0 100%)}
+.scene-ice #scene-front:before{height:25%;background:#0c1115;clip-path:polygon(0 62%,14% 46%,28% 66%,42% 44%,57% 69%,75% 45%,89% 67%,100% 55%,100% 100%,0 100%)}
+.scene-sea #scene-mid:before{height:32%;background:linear-gradient(180deg,rgba(32,66,79,.25),#0e2630 45%,#061116);clip-path:polygon(0 48%,8% 60%,16% 50%,24% 64%,32% 48%,40% 61%,48% 49%,56% 63%,64% 48%,72% 60%,80% 49%,88% 62%,96% 50%,100% 54%,100% 100%,0 100%)}
+.scene-sea #scene-front:before{height:20%;background:#02080b;clip-path:polygon(0 56%,16% 42%,32% 58%,49% 44%,65% 60%,82% 46%,100% 58%,100% 100%,0 100%)}
+@media(max-width:720px){.scene-card{padding:20px 20px;bottom:18px}.scene-name{font-size:40px}.scene-short{font-size:17px}.scene-enter{width:100%}.spot-label{font-size:11px!important;padding:5px 7px}}
+
 /* ---------- CONTROLES ---------- */
 #controls{position:fixed;z-index:30;left:max(18px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
 .ctrl{width:46px;height:46px;background:rgba(6,4,2,.82);border:1px solid var(--gold3);color:var(--gold2);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
@@ -156,7 +194,7 @@ button{font-family:inherit}
   .stats{grid-template-columns:1fr}
   .ctrl{width:42px;height:42px}.round{width:48px;height:48px}
   #legend{right:76px;bottom:18px;width:calc(100vw - 106px)}
-  .spot-label{font-size:8.5px}
+  .spot-label{font-size:11.5px;padding:5px 8px}
 }
 @media(max-height:560px){#panel{height:88vh}.hud-sub{display:none}.hud-title{font-size:34px}}
 @media (prefers-reduced-motion:reduce){#p-hero{transition:none}}
@@ -175,6 +213,13 @@ button{font-family:inherit}
 
   <div id="map-wrap"><div id="map-stage"><img id="map-img" src="map.png" alt="Mapa de Cetrios" draggable="false"></div></div>
   <div id="vignette"></div>
+
+  <section id="scene" aria-hidden="true">
+    <div id="scene-bg"></div><div id="scene-mid"></div><div id="scene-front"></div><div id="scene-fx"></div>
+    <div class="scene-particles" id="scene-particles"></div>
+    <div class="scene-top"><button class="scene-back" onclick="leaveScene()">← Volver al mapa</button></div>
+    <div class="scene-card"><div class="scene-type" id="scene-type"></div><div class="scene-name" id="scene-name"></div><div class="scene-short" id="scene-short"></div><button class="scene-enter" onclick="openCurrentPanel()">Explorar este lugar</button></div>
+  </section>
 
   <aside id="panel">
     <button class="panel-close" onclick="closePanel()" aria-label="Cerrar">×</button>
@@ -210,26 +255,31 @@ button{font-family:inherit}
    Para poner una ilustración propia de un lugar, agregale
    img:'imagenes/korvan.jpg' a esa entrada.
    Si no tiene img, el panel usa un primer plano del mapa.
+
+   Para reemplazar la vista cinematográfica por una ilustración real,
+   agregá sceneImg:'imagenes/aethrion-vista.jpg' a cualquier lugar.
+   La transición, el texto y la navegación se mantienen automáticamente.
    ============================================================ */
 const locations=[
-{id:'aethrion',x:50,y:44,type:'capital',label:'Capital',name:'Aethrion',short:'El corazón palpitante de Cetrios.',stats:{Población:'~800.000',Clima:'Templado',Importancia:'Reino central'},desc:`<em>Aethrion</em> es la capital de Cetrios: una ciudad circular amurallada, construida alrededor del Palacio Negro. Sus anillos interiores concentran mercados, templos del Eco, pasajes nobles y rutas ocultas que bajan hacia antiguos túneles.`,lore:`“Quien domina Aethrion no domina solamente un palacio. Domina el símbolo que todos los reinos miran antes de decidir si obedecen o se rebelan.”`,places:['Palacio Negro','Mercado de los Siete Velos','Murallas internas','Canales y puentes','Catacumbas antiguas'],districts:[['Palacio Negro','Centro político y ceremonial. Allí están el Salón Blanco, el Salón Rojo y el trono real.'],['Anillo del Mercado','Calles densas, puestos, mercaderes, viajeros, rumores y portadores del Eco.'],['Muralla Interior','Primer gran límite de la ciudad-palacio, con puertas custodiadas y pasos de control.'],['Canales del Primer Anillo','Agua alrededor de la zona central, con puentes ceremoniales y accesos vigilados.'],['Túneles antiguos','Rutas subterráneas usadas como escape, contrabando y secretos del reino.']]},
-{id:'velmor',x:34,y:24,type:'city',label:'Reino',name:'Velmor',short:'El reino frío de las montañas del norte.',stats:{Clima:'Glacial',Carácter:'Aislado'},desc:`<em>Velmor</em> es un reino de piedra, bosque y frío. Sus torres oscuras emergen entre montañas y árboles antiguos.`,lore:`“En Velmor, el viento recuerda mejor que los libros.”`,places:['Fortaleza de Velmor','Puesto de Hielo','Rutas del Norte']},
-{id:'darvanis',x:21,y:52,type:'city',label:'Ciudad-Estado',name:'Darvanis',short:'Ciudad de mercaderes, pactos y secretos.',stats:{Comercio:'Muy alto',Influencia:'Subterránea'},desc:`<em>Darvanis</em> compra lo que no puede conquistar y vende lo que otros temen preguntar.`,lore:`“Si un secreto tiene precio, Darvanis ya lo tasó.”`,places:['Mercado negro','Torre de gremios','Rutas de contrabando']},
-{id:'bosque-korvan',x:62,y:22,type:'region',label:'Región',name:'Bosque de Korvan',short:'El bosque que respira y recuerda.',stats:{Acceso:'Restringido',Misterio:'Alto'},desc:`El <em>Bosque de Korvan</em> guarda memorias antiguas. En el Claro del Eco, las almas parecen hablar más fuerte.`,lore:`“No todos los árboles dan sombra. Algunos guardan nombres.”`,places:['Claro del Eco','Árbol Madre','Senderos ocultos']},
-{id:'tierras-heladas',x:50,y:6,type:'danger',label:'Zona peligrosa',name:'Tierras Heladas',short:'Más allá del norte, pocos regresan.',stats:{Peligro:'Extremo',Clima:'Letal'},desc:`Las <em>Tierras Heladas</em> son el límite del mundo conocido. Allí el mapa deja de prometer respuestas.`,lore:`“El norte no mata rápido. Primero te convence de quedarte.”`,places:['Montañas blancas','Rutas perdidas','Ciudad de cristal — leyenda']},
-{id:'islas-tronox',x:84,y:36,type:'region',label:'Archipiélago',name:'Islas de Tronox',short:'Tronox Mayor y Tronox Menor.',stats:{Gobierno:'Consejo',Acceso:'Marítimo'},desc:`Las <em>Islas de Tronox</em> están separadas de Cetrios por aguas difíciles. Tronox Mayor concentra poder; Tronox Menor conserva secretos antiguos.`,lore:`“En Tronox no se pregunta quién manda. Se pregunta quién sobrevivió para contarlo.”`,places:['Tronox Mayor','Tronox Menor','Puertos ocultos']},
-{id:'valle-arden',x:50,y:68,type:'region',label:'Valle',name:'Valle de Arden',short:'Refugio, reconstrucción y tierra fértil.',stats:{Clima:'Templado',Importancia:'Refugio'},desc:`El <em>Valle de Arden</em> es fértil, protegido y disputado. Allí algunos encuentran libertad lejos del peso de Aethrion.`,lore:`“Arden no promete salvarte. Solo te da espacio para volver a levantarte.”`,places:['Liedor','Cicus','Refugios antiguos']},
-{id:'lagos-eldra',x:30,y:68,type:'region',label:'Región lacustre',name:'Lagos de Eldra',short:'Aguas profundas y puertos antiguos.',stats:{Agua:'Abundante',Peligro:'Moderado'},desc:`Los <em>Lagos de Eldra</em> conectan pueblos, puertos y memorias que el agua nunca termina de devolver.`,lore:`“Eldra escucha incluso cuando nadie habla.”`,places:['Puerto de Eldra','Puerto Inlet','Roca del Guardián']},
-{id:'desierto-kael',x:70,y:82,type:'danger',label:'Desierto',name:'Desierto de Kael',short:'Bajo sus ruinas duerme Murmex.',stats:{Peligro:'Muy alto',Agua:'Escasa'},desc:`El <em>Desierto de Kael</em> oculta ruinas enterradas bajo capas de arena. Allí se busca a Murmex: no como una criatura visible, sino como una presencia antigua escondida bajo el mundo.`,lore:`“Kael no guarda muertos. Guarda puertas.”`,places:['Ruinas de Kael','Entrada perdida','Cámaras bajo la arena','Murmex dormido']},
-{id:'serynth',x:46,y:88,type:'city',label:'Ciudad',name:'Serynth',short:'Ciudad de artistas, fugitivos y exiliados.',stats:{Arte:'Alto',Clima:'Cálido'},desc:`<em>Serynth</em> recibe a quienes no encajan en ningún otro sitio de Cetrios.`,lore:`“Serynth no pregunta de dónde venís. Pregunta qué vas a cantar cuando sobrevivas.”`,places:['Teatro del Último Acto','Mercado de memorias','Torre incompleta']},
-{id:'colinas-vorlen',x:68,y:58,type:'region',label:'Región',name:'Colinas de Vorlen',short:'Viejas alianzas y nuevas traiciones.',stats:{Minería:'Alta',Política:'Inestable'},desc:`Las <em>Colinas de Vorlen</em> son ricas en minerales y pobres en paz.`,lore:`“En Vorlen, una colina puede cambiar de dueño antes del atardecer.”`,places:['Vorten','Minas de hierro rojo','Paso del Acuerdo Roto']},
-{id:'puerto-libar',x:80,y:58,type:'city',label:'Puerto',name:'Puerto de Libar',short:'Un puerto pequeño con un palacio imposible.',stats:{Población:'~8.000',Clima:'Marino'},desc:`<em>Puerto de Libar</em> vive del mar, pero todos lo recuerdan por su palacio desproporcionado y hermoso.`,lore:`“En Libar hay más palacio que pueblo.”`,places:['Palacio de Libar','Puerto pesquero','Faro antiguo']},
-{id:'mar-oeste',x:8,y:62,type:'danger',label:'Mar',name:'Mar del Oeste',short:'Aguas que se defienden solas.',stats:{Peligro:'Extremo',Rutas:'Abandonadas'},desc:`El <em>Mar del Oeste</em> es una frontera líquida que Cetrios nunca logró dominar.`,lore:`“No necesita guardianes. Se defiende solo.”`,places:['Roca del Guardián','Lomír','Bahía del Naufragio']}
+{id:'aethrion',scene:'city',sceneBg:'radial-gradient(circle at 55% 28%,rgba(241,216,137,.34),transparent 18%),linear-gradient(180deg,#6b5b43 0%,#2d251c 42%,#090705 100%)',x:50,y:44,type:'capital',label:'Capital',name:'Aethrion',short:'El corazón palpitante de Cetrios.',stats:{Población:'~800.000',Clima:'Templado',Importancia:'Reino central'},desc:`<em>Aethrion</em> es la capital de Cetrios: una ciudad circular amurallada, construida alrededor del Palacio Negro. Sus anillos interiores concentran mercados, templos del Eco, pasajes nobles y rutas ocultas que bajan hacia antiguos túneles.`,lore:`“Quien domina Aethrion no domina solamente un palacio. Domina el símbolo que todos los reinos miran antes de decidir si obedecen o se rebelan.”`,places:['Palacio Negro','Mercado de los Siete Velos','Murallas internas','Canales y puentes','Catacumbas antiguas'],districts:[['Palacio Negro','Centro político y ceremonial. Allí están el Salón Blanco, el Salón Rojo y el trono real.'],['Anillo del Mercado','Calles densas, puestos, mercaderes, viajeros, rumores y portadores del Eco.'],['Muralla Interior','Primer gran límite de la ciudad-palacio, con puertas custodiadas y pasos de control.'],['Canales del Primer Anillo','Agua alrededor de la zona central, con puentes ceremoniales y accesos vigilados.'],['Túneles antiguos','Rutas subterráneas usadas como escape, contrabando y secretos del reino.']]},
+{id:'velmor',scene:'ice',sceneBg:'radial-gradient(circle at 60% 22%,rgba(219,238,241,.42),transparent 20%),linear-gradient(180deg,#6f8791 0%,#31414a 43%,#080d10 100%)',x:34,y:24,type:'city',label:'Reino',name:'Velmor',short:'El reino frío de las montañas del norte.',stats:{Clima:'Glacial',Carácter:'Aislado'},desc:`<em>Velmor</em> es un reino de piedra, bosque y frío. Sus torres oscuras emergen entre montañas y árboles antiguos.`,lore:`“En Velmor, el viento recuerda mejor que los libros.”`,places:['Fortaleza de Velmor','Puesto de Hielo','Rutas del Norte']},
+{id:'darvanis',scene:'city',sceneBg:'radial-gradient(circle at 42% 25%,rgba(224,170,82,.25),transparent 22%),linear-gradient(180deg,#5f4a35 0%,#2b2017 44%,#080604 100%)',x:21,y:52,type:'city',label:'Ciudad-Estado',name:'Darvanis',short:'Ciudad de mercaderes, pactos y secretos.',stats:{Comercio:'Muy alto',Influencia:'Subterránea'},desc:`<em>Darvanis</em> compra lo que no puede conquistar y vende lo que otros temen preguntar.`,lore:`“Si un secreto tiene precio, Darvanis ya lo tasó.”`,places:['Mercado negro','Torre de gremios','Rutas de contrabando']},
+{id:'bosque-korvan',scene:'forest',sceneBg:'radial-gradient(circle at 60% 25%,rgba(126,185,128,.28),transparent 18%),linear-gradient(180deg,#3d5848 0%,#17271d 45%,#040706 100%)',x:62,y:22,type:'region',label:'Región',name:'Bosque de Korvan',short:'El bosque que respira y recuerda.',stats:{Acceso:'Restringido',Misterio:'Alto'},desc:`El <em>Bosque de Korvan</em> guarda memorias antiguas. En el Claro del Eco, las almas parecen hablar más fuerte.`,lore:`“No todos los árboles dan sombra. Algunos guardan nombres.”`,places:['Claro del Eco','Árbol Madre','Senderos ocultos']},
+{id:'tierras-heladas',scene:'ice',sceneBg:'radial-gradient(circle at 50% 20%,rgba(241,250,255,.5),transparent 19%),linear-gradient(180deg,#9fb2bb 0%,#50636f 46%,#0b1116 100%)',x:50,y:6,type:'danger',label:'Zona peligrosa',name:'Tierras Heladas',short:'Más allá del norte, pocos regresan.',stats:{Peligro:'Extremo',Clima:'Letal'},desc:`Las <em>Tierras Heladas</em> son el límite del mundo conocido. Allí el mapa deja de prometer respuestas.`,lore:`“El norte no mata rápido. Primero te convence de quedarte.”`,places:['Montañas blancas','Rutas perdidas','Ciudad de cristal — leyenda']},
+{id:'islas-tronox',scene:'sea',sceneBg:'radial-gradient(circle at 63% 22%,rgba(183,215,221,.26),transparent 16%),linear-gradient(180deg,#536c72 0%,#24404b 43%,#071318 100%)',x:84,y:36,type:'region',label:'Archipiélago',name:'Islas de Tronox',short:'Tronox Mayor y Tronox Menor.',stats:{Gobierno:'Consejo',Acceso:'Marítimo'},desc:`Las <em>Islas de Tronox</em> están separadas de Cetrios por aguas difíciles. Tronox Mayor concentra poder; Tronox Menor conserva secretos antiguos.`,lore:`“En Tronox no se pregunta quién manda. Se pregunta quién sobrevivió para contarlo.”`,places:['Tronox Mayor','Tronox Menor','Puertos ocultos']},
+{id:'valle-arden',scene:'forest',sceneBg:'radial-gradient(circle at 45% 24%,rgba(219,208,126,.28),transparent 20%),linear-gradient(180deg,#718063 0%,#334832 46%,#0a120b 100%)',x:50,y:68,type:'region',label:'Valle',name:'Valle de Arden',short:'Refugio, reconstrucción y tierra fértil.',stats:{Clima:'Templado',Importancia:'Refugio'},desc:`El <em>Valle de Arden</em> es fértil, protegido y disputado. Allí algunos encuentran libertad lejos del peso de Aethrion.`,lore:`“Arden no promete salvarte. Solo te da espacio para volver a levantarte.”`,places:['Liedor','Cicus','Refugios antiguos']},
+{id:'lagos-eldra',scene:'sea',sceneBg:'radial-gradient(circle at 48% 23%,rgba(196,221,221,.24),transparent 18%),linear-gradient(180deg,#607c82 0%,#274c55 43%,#08161b 100%)',x:30,y:68,type:'region',label:'Región lacustre',name:'Lagos de Eldra',short:'Aguas profundas y puertos antiguos.',stats:{Agua:'Abundante',Peligro:'Moderado'},desc:`Los <em>Lagos de Eldra</em> conectan pueblos, puertos y memorias que el agua nunca termina de devolver.`,lore:`“Eldra escucha incluso cuando nadie habla.”`,places:['Puerto de Eldra','Puerto Inlet','Roca del Guardián']},
+{id:'desierto-kael',scene:'desert',sceneBg:'radial-gradient(circle at 65% 22%,rgba(255,207,128,.34),transparent 17%),linear-gradient(180deg,#b77a3e 0%,#70401f 45%,#1a0c04 100%)',x:70,y:82,type:'danger',label:'Desierto',name:'Desierto de Kael',short:'Bajo sus ruinas duerme Murmex.',stats:{Peligro:'Muy alto',Agua:'Escasa'},desc:`El <em>Desierto de Kael</em> oculta ruinas enterradas bajo capas de arena. Allí se busca a Murmex: no como una criatura visible, sino como una presencia antigua escondida bajo el mundo.`,lore:`“Kael no guarda muertos. Guarda puertas.”`,places:['Ruinas de Kael','Entrada perdida','Cámaras bajo la arena','Murmex dormido']},
+{id:'serynth',scene:'city',sceneBg:'radial-gradient(circle at 47% 24%,rgba(234,158,117,.25),transparent 18%),linear-gradient(180deg,#7b5148 0%,#3a2523 43%,#0c0707 100%)',x:46,y:88,type:'city',label:'Ciudad',name:'Serynth',short:'Ciudad de artistas, fugitivos y exiliados.',stats:{Arte:'Alto',Clima:'Cálido'},desc:`<em>Serynth</em> recibe a quienes no encajan en ningún otro sitio de Cetrios.`,lore:`“Serynth no pregunta de dónde venís. Pregunta qué vas a cantar cuando sobrevivas.”`,places:['Teatro del Último Acto','Mercado de memorias','Torre incompleta']},
+{id:'colinas-vorlen',scene:'desert',sceneBg:'radial-gradient(circle at 58% 21%,rgba(214,164,87,.22),transparent 16%),linear-gradient(180deg,#725e45 0%,#3b2d1f 46%,#0b0805 100%)',x:68,y:58,type:'region',label:'Región',name:'Colinas de Vorlen',short:'Viejas alianzas y nuevas traiciones.',stats:{Minería:'Alta',Política:'Inestable'},desc:`Las <em>Colinas de Vorlen</em> son ricas en minerales y pobres en paz.`,lore:`“En Vorlen, una colina puede cambiar de dueño antes del atardecer.”`,places:['Vorten','Minas de hierro rojo','Paso del Acuerdo Roto']},
+{id:'puerto-libar',scene:'sea',sceneBg:'radial-gradient(circle at 55% 22%,rgba(238,211,154,.3),transparent 16%),linear-gradient(180deg,#6f7780 0%,#2f4a55 42%,#071116 100%)',x:80,y:58,type:'city',label:'Puerto',name:'Puerto de Libar',short:'Un puerto pequeño con un palacio imposible.',stats:{Población:'~8.000',Clima:'Marino'},desc:`<em>Puerto de Libar</em> vive del mar, pero todos lo recuerdan por su palacio desproporcionado y hermoso.`,lore:`“En Libar hay más palacio que pueblo.”`,places:['Palacio de Libar','Puerto pesquero','Faro antiguo']},
+{id:'mar-oeste',scene:'sea',sceneBg:'radial-gradient(circle at 40% 18%,rgba(140,160,170,.2),transparent 15%),linear-gradient(180deg,#3e4d57 0%,#17313d 40%,#030b0f 100%)',x:8,y:62,type:'danger',label:'Mar',name:'Mar del Oeste',short:'Aguas que se defienden solas.',stats:{Peligro:'Extremo',Rutas:'Abandonadas'},desc:`El <em>Mar del Oeste</em> es una frontera líquida que Cetrios nunca logró dominar.`,lore:`“No necesita guardianes. Se defiende solo.”`,places:['Roca del Guardián','Lomír','Bahía del Naufragio']}
 ];
 
 const stage=document.getElementById('map-stage'),img=document.getElementById('map-img'),
       wrap=document.getElementById('map-wrap'),panel=document.getElementById('panel'),
       hero=document.getElementById('p-hero'),hud=document.getElementById('hud'),app=document.getElementById('app');
+const scene=document.getElementById('scene'),sceneBg=document.getElementById('scene-bg');
 
 let mapW=900,mapH=1100,scale=1,posX=0,posY=0,minScale=.35,maxScale=5;
 let drag=false,dragged=false,startX=0,startY=0,lastDist=0,anim=null,current=null;
@@ -238,7 +288,7 @@ let drag=false,dragged=false,startX=0,startY=0,lastDist=0,anim=null,current=null
 function apply(){
   stage.style.transform=`translate(${posX}px,${posY}px) scale(${scale})`;
   stage.style.setProperty('--inv',1/scale);
-  stage.classList.toggle('show-labels',scale>1.35);
+  stage.classList.toggle('show-labels',scale>1.05);
 }
 function clamp(){
   const w=mapW*scale,h=mapH*scale,m=Math.min(innerWidth,innerHeight)*.35;
@@ -266,7 +316,7 @@ function animateTo(ts,tx,ty,dur=760,done){
 /* ---------- viajar a un lugar ---------- */
 function focusLocation(loc,openAfter=true){
   const mobile=innerWidth<720;
-  const target=Math.min(maxScale, mobile?2.9:2.2);
+  const target=Math.min(maxScale, mobile?3.25:2.65);
   const x=loc.x/100*mapW, y=loc.y/100*mapH;
   /* en celular el panel ocupa abajo: dejamos el punto arriba */
   const anchorY = openAfter ? (mobile?innerHeight*.15:innerHeight*.42) : innerHeight*.5;
@@ -275,7 +325,7 @@ function focusLocation(loc,openAfter=true){
   app.classList.add('dim');
   hud.classList.add('hud-hide');
   document.querySelectorAll('.hotspot').forEach(h=>h.classList.toggle('active',h.dataset.id===loc.id));
-  animateTo(target,tx,ty,760,()=>{ if(openAfter) openPanel(loc) });
+  animateTo(target,tx,ty,560,()=>{ if(openAfter) enterScene(loc) });
 }
 
 /* ---------- marcadores ---------- */
@@ -290,6 +340,35 @@ function addSpot(loc){
   b.addEventListener('click',e=>{e.stopPropagation();focusLocation(loc)});
   stage.appendChild(b);
 }
+
+/* ---------- entrada cinemática al lugar ---------- */
+function buildParticles(){
+  const box=document.getElementById('scene-particles');
+  if(box.children.length)return;
+  for(let i=0;i<28;i++){
+    const p=document.createElement('i');
+    p.style.left=(Math.random()*100)+'%';p.style.top=(Math.random()*110)+'%';
+    p.style.setProperty('--d',(7+Math.random()*10)+'s');
+    p.style.setProperty('--x',(-35+Math.random()*70)+'px');
+    p.style.animationDelay=(-Math.random()*12)+'s';box.appendChild(p);
+  }
+}
+function enterScene(loc){
+  current=loc; buildParticles();
+  scene.className='scene-'+(loc.scene||'city');
+  sceneBg.style.background=loc.sceneImg?`url('${loc.sceneImg}') center/cover no-repeat`:(loc.sceneBg||'linear-gradient(#443,#111)');
+  document.getElementById('scene-type').textContent=loc.label;
+  document.getElementById('scene-name').textContent=loc.name;
+  document.getElementById('scene-short').textContent=loc.short||'';
+  scene.classList.add('open'); scene.setAttribute('aria-hidden','false');
+  setTimeout(()=>scene.focus?.(),0);
+}
+function leaveScene(){
+  scene.classList.remove('open'); scene.setAttribute('aria-hidden','true');
+  panel.classList.remove('panel-open'); app.classList.remove('dim'); hud.classList.remove('hud-hide');
+  current=null; document.querySelectorAll('.hotspot').forEach(h=>h.classList.remove('active'));
+}
+function openCurrentPanel(){ if(current) openPanel(current); }
 
 /* ---------- panel ---------- */
 function heroFor(loc){
@@ -328,13 +407,12 @@ function goSibling(d){
   const i=locations.findIndex(l=>l.id===current.id);
   const next=locations[(i+d+locations.length)%locations.length];
   panel.classList.remove('panel-open');
-  setTimeout(()=>focusLocation(next),180);
+  setTimeout(()=>focusLocation(next),140);
 }
 function closePanel(){
   panel.classList.remove('panel-open');
-  current=null;
-  app.classList.remove('dim');
-  hud.classList.remove('hud-hide');
+  if(scene.classList.contains('open')) return;
+  current=null; app.classList.remove('dim'); hud.classList.remove('hud-hide');
   document.querySelectorAll('.hotspot').forEach(h=>h.classList.remove('active'));
 }
 
@@ -346,7 +424,7 @@ function fitMap(animated){
   const tx=(innerWidth-mapW*s)/2, ty=(innerHeight-mapH*s)/2;
   if(animated) animateTo(s,tx,ty,700); else {scale=s;posX=tx;posY=ty;apply()}
 }
-function resetView(){closePanel();fitMap(true)}
+function resetView(){if(scene.classList.contains('open'))leaveScene();else closePanel();fitMap(true)}
 function zoomAt(cx,cy,f){
   const bx=(cx-posX)/scale,by=(cy-posY)/scale;
   scale=Math.max(minScale,Math.min(maxScale,scale*f));
@@ -396,7 +474,7 @@ wrap.addEventListener('dblclick',e=>{
   const ts=scale<1.8?2.2:minScale*1.25;
   animateTo(ts,e.clientX-bx*ts,e.clientY-by*ts,420);
 });
-addEventListener('keydown',e=>{if(e.key==='Escape')resetView()});
+addEventListener('keydown',e=>{if(e.key==='Escape'){ if(panel.classList.contains('panel-open')) closePanel(); else if(scene.classList.contains('open')) leaveScene(); else resetView(); }});
 
 /* ---------- extras ---------- */
 function toggleLegend(){document.getElementById('legend').classList.toggle('legend-open');document.getElementById('legend-btn').classList.toggle('active')}
