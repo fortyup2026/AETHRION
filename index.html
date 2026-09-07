@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>CETRIOS — Mapa Interactivo V3</title>
+<title>CETRIOS — Mapa Interactivo Final</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -18,40 +18,24 @@ button{font-family:inherit}
 #map-wrap{position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab;background:linear-gradient(180deg,#050302,#010101)}
 #map-wrap.dragging{cursor:grabbing}
 #map-stage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
-#map-img{display:block;width:900px;height:auto;user-select:none;-webkit-user-drag:none;filter:saturate(1.05) contrast(1.04) brightness(.88);box-shadow:0 0 80px rgba(0,0,0,.8)}
+#map-img{display:block;width:900px;height:auto;user-select:none;-webkit-user-drag:none;filter:saturate(1.05) contrast(1.04) brightness(.9);box-shadow:0 0 80px rgba(0,0,0,.8)}
 #vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 45%,transparent 48%,rgba(0,0,0,.72) 100%);z-index:4;transition:opacity .4s}
 .dim #vignette{opacity:.45}
 
-/* ---------- HUD ---------- */
 #hud{position:fixed;z-index:20;top:max(18px,env(safe-area-inset-top));left:18px;right:18px;pointer-events:none;transition:opacity .35s,transform .35s}
 .hud-hide{opacity:0;transform:translateY(-12px)}
-.hud-copy{max-width:min(420px,70vw);text-shadow:0 2px 18px #000}
+.hud-copy{max-width:min(520px,72vw);text-shadow:0 2px 18px #000}
 .hud-kicker{font-family:'Cinzel',serif;font-size:11px;letter-spacing:8px;color:var(--gold);text-transform:uppercase;opacity:.8}
-.hud-title{font-family:'Cinzel',serif;font-size:clamp(36px,7vw,76px);line-height:.9;font-weight:900;color:var(--gold2);text-shadow:0 0 28px rgba(201,168,76,.25)}
-.hud-sub{font-size:clamp(14px,2.8vw,20px);color:#c9a974;font-style:italic;line-height:1.35;margin-top:8px;max-width:520px}
+.hud-title{font-family:'Cinzel',serif;font-size:clamp(38px,7vw,78px);line-height:.9;font-weight:900;color:var(--gold2);text-shadow:0 0 28px rgba(201,168,76,.25)}
+.hud-sub{font-size:clamp(14px,2.8vw,20px);color:#c9a974;font-style:italic;line-height:1.35;margin-top:8px;max-width:560px}
 .hud-hint{margin-top:14px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--gold3);text-transform:uppercase}
 
-/* ---------- MARCADORES (escala inversa: no crecen con el zoom) ---------- */
-.hotspot{
-  position:absolute;z-index:10;border:0;background:transparent;cursor:pointer;
-  transform:translate(-50%,-50%) scale(var(--inv));
-  transform-origin:50% 50%;
-  transition:filter .2s;
-}
-.spot-hit{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border-radius:50%}
-.mark{position:relative;width:15px;height:15px;display:block}
-.mark i{
-  position:absolute;inset:0;transform:rotate(45deg);
-  background:linear-gradient(140deg,#fff3c4,var(--gold) 55%,#8a6a22);
-  border:1px solid rgba(255,240,190,.85);
-  box-shadow:0 0 9px rgba(201,168,76,.75),0 2px 6px rgba(0,0,0,.9);
-}
-.mark s{
-  position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;
-  border:1px solid rgba(201,168,76,.45);border-radius:50%;
-  animation:pulse 3.2s ease-in-out infinite;
-}
-.hotspot.capital .mark{width:20px;height:20px}
+.hotspot{position:absolute;z-index:10;border:0;background:transparent;cursor:pointer;transform:translate(-50%,-50%) scale(var(--inv));transform-origin:50% 50%;transition:filter .2s}
+.spot-hit{position:absolute;left:-28px;top:-28px;width:56px;height:56px;border-radius:50%}
+.mark{position:relative;width:16px;height:16px;display:block}
+.mark i{position:absolute;inset:0;transform:rotate(45deg);background:linear-gradient(140deg,#fff3c4,var(--gold) 55%,#8a6a22);border:1px solid rgba(255,240,190,.85);box-shadow:0 0 9px rgba(201,168,76,.75),0 2px 6px rgba(0,0,0,.9)}
+.mark s{position:absolute;left:50%;top:50%;width:36px;height:36px;margin:-18px 0 0 -18px;border:1px solid rgba(201,168,76,.45);border-radius:50%;animation:pulse 3.2s ease-in-out infinite}
+.hotspot.capital .mark{width:21px;height:21px}
 .hotspot.capital .mark i{background:linear-gradient(140deg,#fff8dd,#ffe08a 50%,var(--gold));box-shadow:0 0 16px rgba(255,224,138,.85),0 0 34px rgba(201,168,76,.5)}
 .hotspot.region .mark i{background:linear-gradient(140deg,#d8ffe9,#5fa682 60%,#2f5f49);border-color:rgba(200,255,225,.7);box-shadow:0 0 9px rgba(104,178,149,.7),0 2px 6px rgba(0,0,0,.9)}
 .hotspot.region .mark s{border-color:rgba(104,178,149,.4)}
@@ -59,122 +43,44 @@ button{font-family:inherit}
 .hotspot.danger .mark s{border-color:rgba(214,62,62,.38)}
 .hotspot:active{filter:brightness(1.4)}
 @keyframes pulse{0%,100%{transform:scale(.7);opacity:.15}50%{transform:scale(1.05);opacity:.5}}
-
-.spot-label{
-  position:absolute;left:50%;top:15px;transform:translateX(-50%);
-  font-family:'Cinzel',serif;font-size:13px;letter-spacing:1.25px;text-transform:uppercase;
-  color:#f4e3ac;white-space:nowrap;padding:6px 10px;border-radius:7px;
-  background:rgba(4,3,1,.72);border:1px solid rgba(201,168,76,.28);
-  text-shadow:0 2px 6px #000;opacity:0;transition:opacity .25s;pointer-events:none;
-}
+.spot-label{position:absolute;left:50%;top:16px;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:13px;letter-spacing:1.2px;text-transform:uppercase;color:#f4e3ac;white-space:nowrap;padding:6px 10px;border-radius:8px;background:rgba(4,3,1,.72);border:1px solid rgba(201,168,76,.28);text-shadow:0 2px 6px #000;opacity:0;transition:opacity .25s;pointer-events:none}
 .show-labels .spot-label{opacity:1}
 .hotspot.capital .spot-label{opacity:1;font-size:14px;color:#fff1bd;border-color:rgba(201,168,76,.5)}
 .hotspot.active .mark i{box-shadow:0 0 20px #fff0aa,0 0 44px rgba(201,168,76,.8)}
 
-/* ---------- PANEL ---------- */
-#panel{
-  position:fixed;z-index:80;right:16px;top:16px;bottom:16px;width:min(400px,calc(100vw - 32px));
-  background:linear-gradient(160deg,rgba(12,9,4,.97),rgba(4,3,2,.97));
-  border:1px solid var(--gold3);box-shadow:0 24px 80px rgba(0,0,0,.85);
-  transform:translateX(calc(100% + 28px));transition:transform .42s cubic-bezier(.2,.85,.2,1);
-  overflow:hidden;display:flex;flex-direction:column
-}
+#panel{position:fixed;z-index:80;right:16px;top:16px;bottom:16px;width:min(400px,calc(100vw - 32px));background:linear-gradient(160deg,rgba(12,9,4,.97),rgba(4,3,2,.97));border:1px solid var(--gold3);box-shadow:0 24px 80px rgba(0,0,0,.85);transform:translateX(calc(100% + 28px));transition:transform .42s cubic-bezier(.2,.85,.2,1);overflow:hidden;display:flex;flex-direction:column}
 .panel-open{transform:translateX(0)!important}
-
-/* imagen del lugar */
-#p-hero{
-  position:relative;height:190px;flex:0 0 auto;
-  background-color:#0a0704;background-repeat:no-repeat;
-  border-bottom:1px solid rgba(201,168,76,.22);
-  transform:scale(1.06);opacity:0;transition:transform .7s cubic-bezier(.2,.85,.2,1),opacity .5s
-}
+#p-hero{position:relative;height:190px;flex:0 0 auto;background-color:#0a0704;background-repeat:no-repeat;border-bottom:1px solid rgba(201,168,76,.22);transform:scale(1.06);opacity:0;transition:transform .7s cubic-bezier(.2,.85,.2,1),opacity .5s}
 .panel-open #p-hero{transform:scale(1);opacity:1}
-#p-hero:after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(3,2,1,.15) 0%,rgba(3,2,1,.55) 55%,rgba(6,4,2,.97) 100%),
-             radial-gradient(circle at 50% 45%,transparent 30%,rgba(0,0,0,.45) 100%)
-}
-.hero-caption{
-  position:absolute;left:0;right:0;bottom:0;z-index:2;padding:18px 24px 14px
-}
+#p-hero:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,2,1,.15) 0%,rgba(3,2,1,.55) 55%,rgba(6,4,2,.97) 100%), radial-gradient(circle at 50% 45%,transparent 30%,rgba(0,0,0,.45) 100%)}
+.hero-caption{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:18px 24px 14px}
 .panel-type{font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:7px;text-shadow:0 2px 10px #000}
 .panel-name{font-family:'Cinzel',serif;font-size:29px;font-weight:900;color:var(--gold2);line-height:1;text-shadow:0 3px 22px #000,0 0 30px rgba(201,168,76,.3)}
 .panel-close{position:absolute;right:14px;top:14px;z-index:5;width:38px;height:38px;background:rgba(5,3,1,.6);border:1px solid var(--gold3);color:var(--gold2);font-size:18px;cursor:pointer;backdrop-filter:blur(6px)}
 .panel-body{padding:22px 24px 34px;overflow:auto;flex:1 1 auto}
-.sec{margin-bottom:22px}
-.sec-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold3);padding-bottom:7px;border-bottom:1px solid rgba(201,168,76,.15);margin-bottom:10px}
-.sec p{font-size:15px;color:#b89d5e;line-height:1.65}
-.sec em{color:var(--gold2);font-style:normal}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat{border:1px solid rgba(201,168,76,.13);background:rgba(201,168,76,.045);padding:10px}
-.stat small{display:block;font-family:'Cinzel',serif;color:var(--gold3);font-size:8px;letter-spacing:2px;text-transform:uppercase}
-.stat b{display:block;margin-top:4px;color:var(--gold2);font-size:13px}
+.sec{margin-bottom:22px}.sec-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold3);padding-bottom:7px;border-bottom:1px solid rgba(201,168,76,.15);margin-bottom:10px}
+.sec p{font-size:15px;color:#b89d5e;line-height:1.65}.sec em{color:var(--gold2);font-style:normal}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{border:1px solid rgba(201,168,76,.13);background:rgba(201,168,76,.045);padding:10px}.stat small{display:block;font-family:'Cinzel',serif;color:var(--gold3);font-size:8px;letter-spacing:2px;text-transform:uppercase}.stat b{display:block;margin-top:4px;color:var(--gold2);font-size:13px}
 .quote{border-left:2px solid var(--gold3);background:rgba(201,168,76,.035);padding:11px 14px;color:#927941;font-style:italic;line-height:1.55}
-.place{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid rgba(201,168,76,.08);color:#d0b26c}
-.place:before{content:'◆';font-size:10px;color:var(--gold3)}
-.districts{display:grid;grid-template-columns:1fr;gap:9px}
-.district{background:rgba(201,168,76,.045);border:1px solid rgba(201,168,76,.14);padding:11px 12px}
-.district b{font-family:'Cinzel',serif;color:var(--gold2);font-size:13px}
-.district span{display:block;color:#9d854d;font-size:13px;line-height:1.35;margin-top:3px}
-.p-nav{display:flex;gap:8px;margin-top:6px}
-.p-nav button{flex:1;padding:11px 8px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.22);color:var(--gold2);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
-.p-nav button:active{background:rgba(201,168,76,.2)}
+.place{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid rgba(201,168,76,.08);color:#d0b26c}.place:before{content:'◆';font-size:10px;color:var(--gold3)}
+.districts{display:grid;grid-template-columns:1fr;gap:9px}.district{background:rgba(201,168,76,.045);border:1px solid rgba(201,168,76,.14);padding:11px 12px}.district b{font-family:'Cinzel',serif;color:var(--gold2);font-size:13px}.district span{display:block;color:#9d854d;font-size:13px;line-height:1.35;margin-top:3px}
+.p-nav{display:flex;gap:8px;margin-top:6px}.p-nav button{flex:1;padding:11px 8px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.22);color:var(--gold2);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer}.p-nav button:active{background:rgba(201,168,76,.2)}
 
-/* ---------- VISTA CINEMÁTICA DEL LUGAR ---------- */
-#scene{
-  position:fixed;inset:0;z-index:70;overflow:hidden;background:#050403;
-  opacity:0;pointer-events:none;transition:opacity .34s ease;
-}
+#scene{position:fixed;inset:0;z-index:70;overflow:hidden;background:#050403;opacity:0;pointer-events:none;transition:opacity .28s ease}
 #scene.open{opacity:1;pointer-events:auto}
-#scene-bg,#scene-mid,#scene-front,#scene-fx{position:absolute;inset:-3%;will-change:transform,opacity}
-#scene-bg{background-position:center;background-size:cover;transform:scale(1.04);transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
-#scene.open #scene-bg{transform:scale(1)}
-#scene-mid,#scene-front{pointer-events:none}
-#scene-fx{pointer-events:none;background:linear-gradient(180deg,rgba(4,3,2,.12),rgba(4,3,2,.08) 44%,rgba(4,3,2,.72));box-shadow:inset 0 0 180px #000}
-#scene-fx:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 54% 38%,transparent 0 30%,rgba(0,0,0,.28) 76%,rgba(0,0,0,.65));}
-#scene-fx:after{content:'';position:absolute;left:-10%;right:-10%;bottom:-6%;height:42%;background:linear-gradient(180deg,transparent,rgba(3,2,1,.92));filter:blur(10px)}
-.scene-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.scene-particles i{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(241,216,137,.4);box-shadow:0 0 12px rgba(241,216,137,.35);animation:floatDust var(--d,9s) linear infinite;opacity:.25}
-@keyframes floatDust{from{transform:translate3d(0,25vh,0)}to{transform:translate3d(var(--x,30px),-115vh,0)}}
-.scene-top{position:absolute;z-index:5;left:max(18px,env(safe-area-inset-left));right:max(18px,env(safe-area-inset-right));top:max(16px,env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
-.scene-back{border:1px solid rgba(241,216,137,.42);background:rgba(5,4,2,.62);color:#f6e6b7;padding:11px 14px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;backdrop-filter:blur(10px);cursor:pointer;border-radius:9px}
-.scene-card{position:absolute;z-index:6;left:max(20px,env(safe-area-inset-left));bottom:max(24px,env(safe-area-inset-bottom));width:min(680px,calc(100vw - 40px));padding:24px 26px;background:linear-gradient(110deg,rgba(6,4,2,.84),rgba(6,4,2,.48));border:1px solid rgba(201,168,76,.34);backdrop-filter:blur(16px);box-shadow:0 20px 70px rgba(0,0,0,.55);border-radius:16px}
-.scene-type{font-family:'Cinzel',serif;font-size:11px;letter-spacing:5px;color:#c9a84c;text-transform:uppercase}
-.scene-name{font-family:'Cinzel',serif;font-size:clamp(34px,6vw,72px);line-height:.92;font-weight:900;color:#f5df9c;margin-top:5px;text-shadow:0 5px 28px #000}
-.scene-short{font-size:clamp(17px,2.1vw,23px);line-height:1.42;color:#ddc78b;margin-top:12px;max-width:620px}
+#scene-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#scene-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,2,1,.06),rgba(3,2,1,.03) 46%,rgba(3,2,1,.76));box-shadow:inset 0 0 140px rgba(0,0,0,.45)}
+#scene-overlay:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 52% 35%,transparent 0 38%,rgba(0,0,0,.1) 74%,rgba(0,0,0,.35))}
+#scene-overlay:after{content:'';position:absolute;left:-10%;right:-10%;bottom:-8%;height:28%;background:linear-gradient(180deg,transparent,rgba(0,0,0,.88));filter:blur(8px)}
+.scene-top{position:absolute;top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));z-index:4}
+.scene-back{padding:11px 14px;background:rgba(8,6,3,.72);border:1px solid rgba(201,168,76,.24);color:#e8d294;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;border-radius:8px;backdrop-filter:blur(12px);cursor:pointer}
+.scene-card{position:absolute;z-index:4;left:min(34px,4vw);bottom:min(26px,4vw);width:min(560px,calc(100vw - 68px));padding:26px 28px;background:linear-gradient(115deg,rgba(7,5,3,.8),rgba(7,5,3,.52));border:1px solid rgba(241,216,137,.36);border-radius:16px;backdrop-filter:blur(14px);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.scene-type{font-family:'Cinzel',serif;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:#c7a454;opacity:.9}
+.scene-name{font-family:'Cinzel',serif;font-size:clamp(42px,7vw,64px);line-height:.94;font-weight:900;color:#f3dd9c;text-shadow:0 4px 26px rgba(0,0,0,.55)}
+.scene-short{font-size:22px;line-height:1.42;color:#ddc78b;margin-top:12px;max-width:620px}
 .scene-enter{margin-top:17px;border:1px solid rgba(241,216,137,.5);background:rgba(201,168,76,.12);color:#f5df9c;padding:12px 15px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:8px}
 .scene-enter:hover{background:rgba(201,168,76,.22)}
-/* siluetas y profundidad */
-#scene-mid:before,#scene-front:before,#scene-front:after{content:'';position:absolute;left:-5%;right:-5%;bottom:-2%;transform-origin:bottom}
-.scene-forest #scene-mid:before{height:50%;background:repeating-linear-gradient(95deg,transparent 0 4%,rgba(6,10,7,.75) 4.5% 5.3%,transparent 5.8% 9%);clip-path:polygon(0 70%,4% 45%,7% 67%,11% 28%,15% 66%,19% 36%,23% 73%,29% 22%,35% 68%,42% 34%,48% 77%,54% 30%,61% 69%,67% 18%,73% 69%,80% 35%,87% 68%,93% 28%,100% 72%,100% 100%,0 100%);filter:blur(.2px)}
-.scene-forest #scene-front:before{height:36%;background:rgba(2,5,3,.96);clip-path:polygon(0 75%,7% 58%,13% 72%,20% 45%,28% 75%,36% 50%,44% 74%,53% 44%,62% 76%,70% 48%,78% 72%,86% 52%,93% 70%,100% 54%,100% 100%,0 100%)}
-.scene-city #scene-mid:before{height:48%;background:linear-gradient(90deg,#0b0907,#15100b 55%,#090706);clip-path:polygon(0 72%,4% 72%,4% 44%,10% 44%,10% 66%,14% 66%,14% 28%,20% 28%,20% 70%,24% 70%,24% 48%,29% 48%,29% 18%,34% 18%,34% 64%,40% 64%,40% 36%,45% 36%,45% 72%,51% 72%,51% 24%,58% 24%,58% 62%,63% 62%,63% 40%,69% 40%,69% 67%,75% 67%,75% 30%,81% 30%,81% 72%,86% 72%,86% 52%,91% 52%,91% 69%,96% 69%,96% 38%,100% 38%,100% 100%,0 100%)}
-.scene-city #scene-front:before{height:25%;background:#030201;clip-path:polygon(0 68%,10% 48%,19% 65%,29% 42%,42% 65%,53% 47%,66% 69%,79% 43%,90% 64%,100% 50%,100% 100%,0 100%)}
-.scene-desert #scene-mid:before{height:40%;background:linear-gradient(180deg,#8b5c2c,#2e190b);clip-path:polygon(0 60%,9% 44%,18% 62%,31% 37%,43% 65%,58% 36%,72% 62%,86% 41%,100% 60%,100% 100%,0 100%)}
-.scene-desert #scene-front:before{height:28%;background:#1b0e06;clip-path:polygon(0 62%,18% 45%,38% 66%,58% 48%,78% 70%,100% 50%,100% 100%,0 100%)}
-.scene-ice #scene-mid:before{height:52%;background:linear-gradient(180deg,#dce8e9,#49606c);clip-path:polygon(0 79%,8% 48%,15% 72%,25% 28%,34% 68%,45% 16%,54% 67%,64% 34%,73% 72%,84% 24%,92% 62%,100% 36%,100% 100%,0 100%)}
-.scene-ice #scene-front:before{height:25%;background:#0c1115;clip-path:polygon(0 62%,14% 46%,28% 66%,42% 44%,57% 69%,75% 45%,89% 67%,100% 55%,100% 100%,0 100%)}
-.scene-sea #scene-mid:before{height:32%;background:linear-gradient(180deg,rgba(32,66,79,.25),#0e2630 45%,#061116);clip-path:polygon(0 48%,8% 60%,16% 50%,24% 64%,32% 48%,40% 61%,48% 49%,56% 63%,64% 48%,72% 60%,80% 49%,88% 62%,96% 50%,100% 54%,100% 100%,0 100%)}
-.scene-sea #scene-front:before{height:20%;background:#02080b;clip-path:polygon(0 56%,16% 42%,32% 58%,49% 44%,65% 60%,82% 46%,100% 58%,100% 100%,0 100%)}
 
-/* V3: las panorámicas ya no usan siluetas geométricas CSS. El paisaje completo
-   se dibuja como una ilustración SVG única por territorio. */
-#scene-mid,#scene-front{display:none!important}
-#scene-bg{inset:0;background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important}
-#scene-fx{inset:0;background:linear-gradient(180deg,rgba(3,3,3,.04),rgba(3,3,3,.02) 48%,rgba(3,2,1,.62));box-shadow:inset 0 0 120px rgba(0,0,0,.45)}
-#scene-fx:before{background:radial-gradient(circle at 52% 38%,transparent 0 42%,rgba(0,0,0,.12) 75%,rgba(0,0,0,.38))}
-#scene-fx:after{height:24%;opacity:.62}
-.scene-card{background:linear-gradient(110deg,rgba(6,4,2,.78),rgba(6,4,2,.48));border-color:rgba(236,208,128,.38)}
-@media(max-width:720px){
-  .scene-card{padding:18px 18px;bottom:14px;width:calc(100vw - 28px);left:14px}
-  .scene-name{font-size:clamp(34px,10vw,48px)}
-  .scene-short{font-size:16px}
-  .scene-enter{width:100%}
-  .spot-label{font-size:12px!important;padding:6px 8px;letter-spacing:1.3px}
-}
-
-
-/* ---------- CONTROLES ---------- */
 #controls{position:fixed;z-index:30;left:max(18px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
 .ctrl{width:46px;height:46px;background:rgba(6,4,2,.82);border:1px solid var(--gold3);color:var(--gold2);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
 .ctrl:active{background:rgba(201,168,76,.22)}
@@ -182,35 +88,17 @@ button{font-family:inherit}
 .round{width:50px;height:50px;border-radius:50%;border:1px solid var(--gold3);background:rgba(6,4,2,.84);color:var(--gold2);font-size:21px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 35px rgba(0,0,0,.55);backdrop-filter:blur(12px)}
 .round.active{background:radial-gradient(circle,rgba(201,168,76,.32),rgba(6,4,2,.9));box-shadow:0 0 24px rgba(201,168,76,.28)}
 #legend{position:fixed;z-index:45;right:max(78px,calc(env(safe-area-inset-right) + 78px));bottom:max(18px,env(safe-area-inset-bottom));width:min(290px,calc(100vw - 112px));background:rgba(7,5,2,.94);border:1px solid var(--gold3);box-shadow:0 20px 60px rgba(0,0,0,.75);padding:15px 17px;backdrop-filter:blur(15px);transform:translateY(15px) scale(.98);opacity:0;pointer-events:none;transition:.22s}
-.legend-open{opacity:1!important;transform:translateY(0) scale(1)!important;pointer-events:auto!important}
-.legend-title{font-family:'Cinzel',serif;color:var(--gold2);font-size:11px;letter-spacing:4px;margin-bottom:12px}
-.legend-row{display:flex;align-items:center;gap:11px;font-family:'Cinzel',serif;color:#a58a50;font-size:11px;letter-spacing:1.5px;margin:9px 0}
-.ld{width:12px;height:12px;flex:0 0 auto;transform:rotate(45deg)}
-.ld.cap{background:linear-gradient(140deg,#fff8dd,var(--gold))}
-.ld.city{background:linear-gradient(140deg,#fff3c4,var(--gold) 55%,#8a6a22)}
-.ld.reg{background:linear-gradient(140deg,#d8ffe9,#5fa682)}
-.ld.dan{background:linear-gradient(140deg,#ffb0b0,#c61e1e)}
-#loading{position:fixed;z-index:999;inset:0;background:#030201;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .7s}
-.loading-done{opacity:0;pointer-events:none}
-.load-title{font-family:'Cinzel',serif;font-size:clamp(42px,10vw,72px);letter-spacing:14px;color:var(--gold);text-shadow:0 0 45px rgba(201,168,76,.35)}
-.load-sub{font-style:italic;color:#927941}
-.loadbar{width:min(320px,70vw);height:2px;background:rgba(201,168,76,.12);overflow:hidden}
-.loadbar:after{content:'';display:block;width:55%;height:100%;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:load 1.4s infinite}
+.legend-open{opacity:1!important;transform:translateY(0) scale(1)!important;pointer-events:auto!important}.legend-title{font-family:'Cinzel',serif;color:var(--gold2);font-size:11px;letter-spacing:4px;margin-bottom:12px}.legend-row{display:flex;align-items:center;gap:11px;font-family:'Cinzel',serif;color:#a58a50;font-size:11px;letter-spacing:1.5px;margin:9px 0}
+.ld{width:12px;height:12px;flex:0 0 auto;transform:rotate(45deg)}.ld.cap{background:linear-gradient(140deg,#fff8dd,var(--gold))}.ld.city{background:linear-gradient(140deg,#fff3c4,var(--gold) 55%,#8a6a22)}.ld.reg{background:linear-gradient(140deg,#d8ffe9,#5fa682)}.ld.dan{background:linear-gradient(140deg,#ffb0b0,#c61e1e)}
+#loading{position:fixed;z-index:999;inset:0;background:#030201;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .7s}.loading-done{opacity:0;pointer-events:none}.load-title{font-family:'Cinzel',serif;font-size:clamp(42px,10vw,72px);letter-spacing:14px;color:var(--gold);text-shadow:0 0 45px rgba(201,168,76,.35)}.load-sub{font-style:italic;color:#927941}.loadbar{width:min(320px,70vw);height:2px;background:rgba(201,168,76,.12);overflow:hidden}.loadbar:after{content:'';display:block;width:55%;height:100%;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:load 1.4s infinite}
 @keyframes load{from{transform:translateX(-120%)}to{transform:translateX(220%)}}
 
 @media(max-width:720px){
-  #hud{top:14px;left:14px;right:14px}
-  .hud-copy{max-width:78vw}.hud-kicker{font-size:9px;letter-spacing:5px}
-  .hud-title{font-size:42px}.hud-sub{font-size:15px;max-width:280px}
-  #panel{left:0;right:0;top:auto;bottom:0;width:100%;height:74vh;border-left:0;border-right:0;border-bottom:0;border-radius:20px 20px 0 0;transform:translateY(105%)}
-  .panel-open{transform:translateY(0)!important}
-  #p-hero{height:168px;border-radius:20px 20px 0 0}
-  .panel-name{font-size:25px}
-  .panel-body{padding:18px 22px 40px}
-  .stats{grid-template-columns:1fr}
-  .ctrl{width:42px;height:42px}.round{width:48px;height:48px}
+  #hud{top:14px;left:14px;right:14px}.hud-copy{max-width:78vw}.hud-kicker{font-size:9px;letter-spacing:5px}.hud-title{font-size:42px}.hud-sub{font-size:15px;max-width:280px}
+  #panel{left:0;right:0;top:auto;bottom:0;width:100%;height:74vh;border-left:0;border-right:0;border-bottom:0;border-radius:20px 20px 0 0;transform:translateY(105%)} .panel-open{transform:translateY(0)!important}
+  #p-hero{height:168px;border-radius:20px 20px 0 0}.panel-name{font-size:25px}.panel-body{padding:18px 22px 40px}.stats{grid-template-columns:1fr}.ctrl{width:42px;height:42px}.round{width:48px;height:48px}.spot-label{font-size:11.5px;padding:5px 8px}
   #legend{right:76px;bottom:18px;width:calc(100vw - 106px)}
-  .spot-label{font-size:11.5px;padding:5px 8px}
+  .scene-card{padding:18px 18px;bottom:14px;width:calc(100vw - 28px);left:14px}.scene-name{font-size:clamp(34px,10vw,48px)}.scene-short{font-size:16px}.scene-enter{width:100%}
 }
 @media(max-height:560px){#panel{height:88vh}.hud-sub{display:none}.hud-title{font-size:34px}}
 @media (prefers-reduced-motion:reduce){#p-hero{transition:none}}
@@ -231,311 +119,176 @@ button{font-family:inherit}
   <div id="vignette"></div>
 
   <section id="scene" aria-hidden="true">
-    <div id="scene-bg"></div><div id="scene-mid"></div><div id="scene-front"></div><div id="scene-fx"></div>
-    <div class="scene-particles" id="scene-particles"></div>
+    <canvas id="scene-canvas"></canvas>
+    <div id="scene-overlay"></div>
     <div class="scene-top"><button class="scene-back" onclick="leaveScene()">← Volver al mapa</button></div>
     <div class="scene-card"><div class="scene-type" id="scene-type"></div><div class="scene-name" id="scene-name"></div><div class="scene-short" id="scene-short"></div><button class="scene-enter" onclick="openCurrentPanel()">Explorar este lugar</button></div>
   </section>
 
   <aside id="panel">
     <button class="panel-close" onclick="closePanel()" aria-label="Cerrar">×</button>
-    <div id="p-hero"><div class="hero-caption">
-      <div class="panel-type" id="p-type"></div>
-      <div class="panel-name" id="p-name"></div>
-    </div></div>
+    <div id="p-hero"><div class="hero-caption"><div class="panel-type" id="p-type"></div><div class="panel-name" id="p-name"></div></div></div>
     <div class="panel-body" id="p-body"></div>
   </aside>
 
-  <div id="controls">
-    <button class="ctrl" onclick="zoomAtCenter(1.25)" aria-label="Acercar">+</button>
-    <button class="ctrl" onclick="zoomAtCenter(.8)" aria-label="Alejar">−</button>
-    <button class="ctrl" onclick="resetView()" style="font-size:17px" aria-label="Ver todo el mapa">⌂</button>
-  </div>
-  <div id="right-actions">
-    <button id="legend-btn" class="round" onclick="toggleLegend()" aria-label="Leyenda">?</button>
-    <button id="music-btn" class="round" onclick="toggleMusic()" aria-label="Música">♪</button>
-  </div>
-  <div id="legend">
-    <div class="legend-title">LEYENDA</div>
-    <div class="legend-row"><span class="ld cap"></span>Capital</div>
-    <div class="legend-row"><span class="ld city"></span>Ciudad / Reino</div>
-    <div class="legend-row"><span class="ld reg"></span>Región / Bosque</div>
-    <div class="legend-row"><span class="ld dan"></span>Zona peligrosa</div>
-  </div>
+  <div id="controls"><button class="ctrl" onclick="zoomAtCenter(1.25)" aria-label="Acercar">+</button><button class="ctrl" onclick="zoomAtCenter(.8)" aria-label="Alejar">−</button><button class="ctrl" onclick="resetView()" style="font-size:17px" aria-label="Ver todo el mapa">⌂</button></div>
+  <div id="right-actions"><button id="legend-btn" class="round" onclick="toggleLegend()" aria-label="Leyenda">?</button><button id="music-btn" class="round" onclick="toggleMusic()" aria-label="Música">♪</button></div>
+  <div id="legend"><div class="legend-title">LEYENDA</div><div class="legend-row"><span class="ld cap"></span>Capital</div><div class="legend-row"><span class="ld city"></span>Ciudad / Reino</div><div class="legend-row"><span class="ld reg"></span>Región / Bosque</div><div class="legend-row"><span class="ld dan"></span>Zona peligrosa</div></div>
   <audio id="ambience" src="ambiente-cetrios.mp3" loop preload="none"></audio>
 </div>
 
 <script>
-/* ============================================================
-   DATOS
-   Para poner una ilustración propia de un lugar, agregale
-   img:'imagenes/korvan.jpg' a esa entrada.
-   Si no tiene img, el panel usa un primer plano del mapa.
-
-   Para reemplazar la vista cinematográfica por una ilustración real,
-   agregá sceneImg:'imagenes/aethrion-vista.jpg' a cualquier lugar.
-   La transición, el texto y la navegación se mantienen automáticamente.
-   ============================================================ */
 const locations=[
-{id:'aethrion',scene:'city',sceneBg:'radial-gradient(circle at 55% 28%,rgba(241,216,137,.34),transparent 18%),linear-gradient(180deg,#6b5b43 0%,#2d251c 42%,#090705 100%)',x:50,y:44,type:'capital',label:'Capital',name:'Aethrion',short:'El corazón palpitante de Cetrios.',stats:{Población:'~800.000',Clima:'Templado',Importancia:'Reino central'},desc:`<em>Aethrion</em> es la capital de Cetrios: una ciudad circular amurallada, construida alrededor del Palacio Negro. Sus anillos interiores concentran mercados, templos del Eco, pasajes nobles y rutas ocultas que bajan hacia antiguos túneles.`,lore:`“Quien domina Aethrion no domina solamente un palacio. Domina el símbolo que todos los reinos miran antes de decidir si obedecen o se rebelan.”`,places:['Palacio Negro','Mercado de los Siete Velos','Murallas internas','Canales y puentes','Catacumbas antiguas'],districts:[['Palacio Negro','Centro político y ceremonial. Allí están el Salón Blanco, el Salón Rojo y el trono real.'],['Anillo del Mercado','Calles densas, puestos, mercaderes, viajeros, rumores y portadores del Eco.'],['Muralla Interior','Primer gran límite de la ciudad-palacio, con puertas custodiadas y pasos de control.'],['Canales del Primer Anillo','Agua alrededor de la zona central, con puentes ceremoniales y accesos vigilados.'],['Túneles antiguos','Rutas subterráneas usadas como escape, contrabando y secretos del reino.']]},
-{id:'velmor',scene:'ice',sceneBg:'radial-gradient(circle at 60% 22%,rgba(219,238,241,.42),transparent 20%),linear-gradient(180deg,#6f8791 0%,#31414a 43%,#080d10 100%)',x:34,y:24,type:'city',label:'Reino',name:'Velmor',short:'El reino frío de las montañas del norte.',stats:{Clima:'Glacial',Carácter:'Aislado'},desc:`<em>Velmor</em> es un reino de piedra, bosque y frío. Sus torres oscuras emergen entre montañas y árboles antiguos.`,lore:`“En Velmor, el viento recuerda mejor que los libros.”`,places:['Fortaleza de Velmor','Puesto de Hielo','Rutas del Norte']},
-{id:'darvanis',scene:'city',sceneBg:'radial-gradient(circle at 42% 25%,rgba(224,170,82,.25),transparent 22%),linear-gradient(180deg,#5f4a35 0%,#2b2017 44%,#080604 100%)',x:21,y:52,type:'city',label:'Ciudad-Estado',name:'Darvanis',short:'Ciudad de mercaderes, pactos y secretos.',stats:{Comercio:'Muy alto',Influencia:'Subterránea'},desc:`<em>Darvanis</em> compra lo que no puede conquistar y vende lo que otros temen preguntar.`,lore:`“Si un secreto tiene precio, Darvanis ya lo tasó.”`,places:['Mercado negro','Torre de gremios','Rutas de contrabando']},
-{id:'bosque-korvan',scene:'forest',sceneBg:'radial-gradient(circle at 60% 25%,rgba(126,185,128,.28),transparent 18%),linear-gradient(180deg,#3d5848 0%,#17271d 45%,#040706 100%)',x:62,y:22,type:'region',label:'Región',name:'Bosque de Korvan',short:'El bosque que respira y recuerda.',stats:{Acceso:'Restringido',Misterio:'Alto'},desc:`El <em>Bosque de Korvan</em> guarda memorias antiguas. En el Claro del Eco, las almas parecen hablar más fuerte.`,lore:`“No todos los árboles dan sombra. Algunos guardan nombres.”`,places:['Claro del Eco','Árbol Madre','Senderos ocultos']},
-{id:'tierras-heladas',scene:'ice',sceneBg:'radial-gradient(circle at 50% 20%,rgba(241,250,255,.5),transparent 19%),linear-gradient(180deg,#9fb2bb 0%,#50636f 46%,#0b1116 100%)',x:50,y:6,type:'danger',label:'Zona peligrosa',name:'Tierras Heladas',short:'Más allá del norte, pocos regresan.',stats:{Peligro:'Extremo',Clima:'Letal'},desc:`Las <em>Tierras Heladas</em> son el límite del mundo conocido. Allí el mapa deja de prometer respuestas.`,lore:`“El norte no mata rápido. Primero te convence de quedarte.”`,places:['Montañas blancas','Rutas perdidas','Ciudad de cristal — leyenda']},
-{id:'islas-tronox',scene:'sea',sceneBg:'radial-gradient(circle at 63% 22%,rgba(183,215,221,.26),transparent 16%),linear-gradient(180deg,#536c72 0%,#24404b 43%,#071318 100%)',x:84,y:36,type:'region',label:'Archipiélago',name:'Islas de Tronox',short:'Tronox Mayor y Tronox Menor.',stats:{Gobierno:'Consejo',Acceso:'Marítimo'},desc:`Las <em>Islas de Tronox</em> están separadas de Cetrios por aguas difíciles. Tronox Mayor concentra poder; Tronox Menor conserva secretos antiguos.`,lore:`“En Tronox no se pregunta quién manda. Se pregunta quién sobrevivió para contarlo.”`,places:['Tronox Mayor','Tronox Menor','Puertos ocultos']},
-{id:'valle-arden',scene:'forest',sceneBg:'radial-gradient(circle at 45% 24%,rgba(219,208,126,.28),transparent 20%),linear-gradient(180deg,#718063 0%,#334832 46%,#0a120b 100%)',x:50,y:68,type:'region',label:'Valle',name:'Valle de Arden',short:'Refugio, reconstrucción y tierra fértil.',stats:{Clima:'Templado',Importancia:'Refugio'},desc:`El <em>Valle de Arden</em> es fértil, protegido y disputado. Allí algunos encuentran libertad lejos del peso de Aethrion.`,lore:`“Arden no promete salvarte. Solo te da espacio para volver a levantarte.”`,places:['Liedor','Cicus','Refugios antiguos']},
-{id:'lagos-eldra',scene:'sea',sceneBg:'radial-gradient(circle at 48% 23%,rgba(196,221,221,.24),transparent 18%),linear-gradient(180deg,#607c82 0%,#274c55 43%,#08161b 100%)',x:30,y:68,type:'region',label:'Región lacustre',name:'Lagos de Eldra',short:'Aguas profundas y puertos antiguos.',stats:{Agua:'Abundante',Peligro:'Moderado'},desc:`Los <em>Lagos de Eldra</em> conectan pueblos, puertos y memorias que el agua nunca termina de devolver.`,lore:`“Eldra escucha incluso cuando nadie habla.”`,places:['Puerto de Eldra','Puerto Inlet','Roca del Guardián']},
-{id:'desierto-kael',scene:'desert',sceneBg:'radial-gradient(circle at 65% 22%,rgba(255,207,128,.34),transparent 17%),linear-gradient(180deg,#b77a3e 0%,#70401f 45%,#1a0c04 100%)',x:70,y:82,type:'danger',label:'Desierto',name:'Desierto de Kael',short:'Bajo sus ruinas duerme Murmex.',stats:{Peligro:'Muy alto',Agua:'Escasa'},desc:`El <em>Desierto de Kael</em> oculta ruinas enterradas bajo capas de arena. Allí se busca a Murmex: no como una criatura visible, sino como una presencia antigua escondida bajo el mundo.`,lore:`“Kael no guarda muertos. Guarda puertas.”`,places:['Ruinas de Kael','Entrada perdida','Cámaras bajo la arena','Murmex dormido']},
-{id:'serynth',scene:'city',sceneBg:'radial-gradient(circle at 47% 24%,rgba(234,158,117,.25),transparent 18%),linear-gradient(180deg,#7b5148 0%,#3a2523 43%,#0c0707 100%)',x:46,y:88,type:'city',label:'Ciudad',name:'Serynth',short:'Ciudad de artistas, fugitivos y exiliados.',stats:{Arte:'Alto',Clima:'Cálido'},desc:`<em>Serynth</em> recibe a quienes no encajan en ningún otro sitio de Cetrios.`,lore:`“Serynth no pregunta de dónde venís. Pregunta qué vas a cantar cuando sobrevivas.”`,places:['Teatro del Último Acto','Mercado de memorias','Torre incompleta']},
-{id:'colinas-vorlen',scene:'desert',sceneBg:'radial-gradient(circle at 58% 21%,rgba(214,164,87,.22),transparent 16%),linear-gradient(180deg,#725e45 0%,#3b2d1f 46%,#0b0805 100%)',x:68,y:58,type:'region',label:'Región',name:'Colinas de Vorlen',short:'Viejas alianzas y nuevas traiciones.',stats:{Minería:'Alta',Política:'Inestable'},desc:`Las <em>Colinas de Vorlen</em> son ricas en minerales y pobres en paz.`,lore:`“En Vorlen, una colina puede cambiar de dueño antes del atardecer.”`,places:['Vorten','Minas de hierro rojo','Paso del Acuerdo Roto']},
-{id:'puerto-libar',scene:'sea',sceneBg:'radial-gradient(circle at 55% 22%,rgba(238,211,154,.3),transparent 16%),linear-gradient(180deg,#6f7780 0%,#2f4a55 42%,#071116 100%)',x:80,y:58,type:'city',label:'Puerto',name:'Puerto de Libar',short:'Un puerto pequeño con un palacio imposible.',stats:{Población:'~8.000',Clima:'Marino'},desc:`<em>Puerto de Libar</em> vive del mar, pero todos lo recuerdan por su palacio desproporcionado y hermoso.`,lore:`“En Libar hay más palacio que pueblo.”`,places:['Palacio de Libar','Puerto pesquero','Faro antiguo']},
-{id:'mar-oeste',scene:'sea',sceneBg:'radial-gradient(circle at 40% 18%,rgba(140,160,170,.2),transparent 15%),linear-gradient(180deg,#3e4d57 0%,#17313d 40%,#030b0f 100%)',x:8,y:62,type:'danger',label:'Mar',name:'Mar del Oeste',short:'Aguas que se defienden solas.',stats:{Peligro:'Extremo',Rutas:'Abandonadas'},desc:`El <em>Mar del Oeste</em> es una frontera líquida que Cetrios nunca logró dominar.`,lore:`“No necesita guardianes. Se defiende solo.”`,places:['Roca del Guardián','Lomír','Bahía del Naufragio']}
+{id:'aethrion',x:50,y:44,type:'capital',label:'Capital',name:'Aethrion',short:'El corazón palpitante de Cetrios.',stats:{Población:'~800.000',Clima:'Templado',Importancia:'Reino central'},desc:`<em>Aethrion</em> es la capital de Cetrios: una ciudad circular amurallada, construida alrededor del Palacio Negro. Sus anillos interiores concentran mercados, templos del Eco, pasajes nobles y rutas ocultas que bajan hacia antiguos túneles.`,lore:`“Quien domina Aethrion no domina solamente un palacio. Domina el símbolo que todos los reinos miran antes de decidir si obedecen o se rebelan.”`,places:['Palacio Negro','Mercado de los Siete Velos','Murallas internas','Canales y puentes','Catacumbas antiguas']},
+{id:'velmor',x:34,y:24,type:'city',label:'Reino',name:'Velmor',short:'El reino frío de las montañas del norte.',stats:{Clima:'Glacial',Carácter:'Aislado'},desc:`<em>Velmor</em> es un reino de piedra, bosque y frío. Sus torres oscuras emergen entre montañas y árboles antiguos.`,lore:`“En Velmor, el viento recuerda mejor que los libros.”`,places:['Fortaleza de Velmor','Puesto de Hielo','Rutas del Norte']},
+{id:'darvanis',x:21,y:52,type:'city',label:'Ciudad-Estado',name:'Darvanis',short:'Ciudad de mercaderes, pactos y secretos.',stats:{Comercio:'Muy alto',Influencia:'Subterránea'},desc:`<em>Darvanis</em> compra lo que no puede conquistar y vende lo que otros temen preguntar.`,lore:`“Si un secreto tiene precio, Darvanis ya lo tasó.”`,places:['Mercado negro','Torre de gremios','Rutas de contrabando']},
+{id:'bosque-korvan',x:62,y:22,type:'region',label:'Región',name:'Bosque de Korvan',short:'El bosque que respira y recuerda.',stats:{Acceso:'Restringido',Misterio:'Alto'},desc:`El <em>Bosque de Korvan</em> guarda memorias antiguas. En el Claro del Eco, las almas parecen hablar más fuerte.`,lore:`“No todos los árboles dan sombra. Algunos guardan nombres.”`,places:['Claro del Eco','Árbol Madre','Senderos ocultos']},
+{id:'tierras-heladas',x:50,y:6,type:'danger',label:'Zona peligrosa',name:'Tierras Heladas',short:'Más allá del norte, pocos regresan.',stats:{Peligro:'Extremo',Clima:'Letal'},desc:`Las <em>Tierras Heladas</em> son el límite del mundo conocido. Allí el mapa deja de prometer respuestas.`,lore:`“El norte no mata rápido. Primero te convence de quedarte.”`,places:['Montañas blancas','Rutas perdidas','Ciudad de cristal — leyenda']},
+{id:'islas-tronox',x:84,y:36,type:'region',label:'Archipiélago',name:'Islas de Tronox',short:'Tronox Mayor y Tronox Menor.',stats:{Gobierno:'Consejo',Acceso:'Marítimo'},desc:`Las <em>Islas de Tronox</em> están separadas de Cetrios por aguas difíciles. Tronox Mayor concentra poder; Tronox Menor conserva secretos antiguos.`,lore:`“En Tronox no se pregunta quién manda. Se pregunta quién sobrevivió para contarlo.”`,places:['Tronox Mayor','Tronox Menor','Puertos ocultos']},
+{id:'valle-arden',x:50,y:68,type:'region',label:'Valle',name:'Valle de Arden',short:'Refugio, reconstrucción y tierra fértil.',stats:{Clima:'Templado',Importancia:'Refugio'},desc:`El <em>Valle de Arden</em> es fértil, protegido y disputado. Allí algunos encuentran libertad lejos del peso de Aethrion.`,lore:`“Arden no promete salvarte. Solo te da espacio para volver a levantarte.”`,places:['Liedor','Cicus','Refugios antiguos']},
+{id:'lagos-eldra',x:30,y:68,type:'region',label:'Región lacustre',name:'Lagos de Eldra',short:'Aguas profundas y puertos antiguos.',stats:{Agua:'Abundante',Peligro:'Moderado'},desc:`Los <em>Lagos de Eldra</em> conectan pueblos, puertos y memorias que el agua nunca termina de devolver.`,lore:`“Eldra escucha incluso cuando nadie habla.”`,places:['Puerto de Eldra','Puerto Inlet','Roca del Guardián']},
+{id:'desierto-kael',x:70,y:82,type:'danger',label:'Desierto',name:'Desierto de Kael',short:'Bajo sus ruinas duerme Murmex.',stats:{Peligro:'Muy alto',Agua:'Escasa'},desc:`El <em>Desierto de Kael</em> oculta ruinas enterradas bajo capas de arena. Allí se busca a Murmex: no como una criatura visible, sino como una presencia antigua escondida bajo el mundo.`,lore:`“Kael no guarda muertos. Guarda puertas.”`,places:['Ruinas de Kael','Entrada perdida','Cámaras bajo la arena','Murmex dormido']},
+{id:'serynth',x:46,y:88,type:'city',label:'Ciudad',name:'Serynth',short:'Ciudad de artistas, fugitivos y exiliados.',stats:{Arte:'Alto',Clima:'Cálido'},desc:`<em>Serynth</em> recibe a quienes no encajan en ningún otro sitio de Cetrios.`,lore:`“Serynth no pregunta de dónde venís. Pregunta qué vas a cantar cuando sobrevivas.”`,places:['Teatro del Último Acto','Mercado de memorias','Torre incompleta']},
+{id:'colinas-vorlen',x:68,y:58,type:'region',label:'Región',name:'Colinas de Vorlen',short:'Viejas alianzas y nuevas traiciones.',stats:{Minería:'Alta',Política:'Inestable'},desc:`Las <em>Colinas de Vorlen</em> son ricas en minerales y pobres en paz.`,lore:`“En Vorlen, una colina puede cambiar de dueño antes del atardecer.”`,places:['Vorten','Minas de hierro rojo','Paso del Acuerdo Roto']},
+{id:'puerto-libar',x:80,y:58,type:'city',label:'Puerto',name:'Puerto de Libar',short:'Un puerto pequeño con un palacio imposible.',stats:{Población:'~8.000',Clima:'Marino'},desc:`<em>Puerto de Libar</em> vive del mar, pero todos lo recuerdan por su palacio desproporcionado y hermoso.`,lore:`“En Libar hay más palacio que pueblo.”`,places:['Palacio de Libar','Puerto pesquero','Faro antiguo']},
+{id:'mar-oeste',x:8,y:62,type:'danger',label:'Mar',name:'Mar del Oeste',short:'Aguas que se defienden solas.',stats:{Peligro:'Extremo',Rutas:'Abandonadas'},desc:`El <em>Mar del Oeste</em> es una frontera líquida que Cetrios nunca logró dominar.`,lore:`“No necesita guardianes. Se defiende solo.”`,places:['Roca del Guardián','Lomír','Bahía del Naufragio']}
 ];
 
-const stage=document.getElementById('map-stage'),img=document.getElementById('map-img'),
-      wrap=document.getElementById('map-wrap'),panel=document.getElementById('panel'),
-      hero=document.getElementById('p-hero'),hud=document.getElementById('hud'),app=document.getElementById('app');
-const scene=document.getElementById('scene'),sceneBg=document.getElementById('scene-bg');
-
+const stage=document.getElementById('map-stage'),img=document.getElementById('map-img'),wrap=document.getElementById('map-wrap'),panel=document.getElementById('panel'),hero=document.getElementById('p-hero'),hud=document.getElementById('hud'),app=document.getElementById('app');
+const scene=document.getElementById('scene');
+const sceneCanvas=document.getElementById('scene-canvas');
+const sctx=sceneCanvas.getContext('2d');
 let mapW=900,mapH=1100,scale=1,posX=0,posY=0,minScale=.35,maxScale=5;
-let drag=false,dragged=false,startX=0,startY=0,lastDist=0,anim=null,current=null;
+let drag=false,startX=0,startY=0,lastDist=0,anim=null,current=null;
 
-/* ---------- transformación ---------- */
-function apply(){
-  stage.style.transform=`translate(${posX}px,${posY}px) scale(${scale})`;
-  stage.style.setProperty('--inv',1/scale);
-  stage.classList.toggle('show-labels',scale>1.05);
-}
-function clamp(){
-  const w=mapW*scale,h=mapH*scale,m=Math.min(innerWidth,innerHeight)*.35;
-  posX=Math.min(m,Math.max(innerWidth-w-m,posX));
-  posY=Math.min(m,Math.max(innerHeight-h-m,posY));
-  if(w+m*2<innerWidth)posX=(innerWidth-w)/2;
-  if(h+m*2<innerHeight)posY=(innerHeight-h)/2;
-}
-
-/* ---------- animación suave ---------- */
+function apply(){stage.style.transform=`translate(${posX}px,${posY}px) scale(${scale})`;stage.style.setProperty('--inv',1/scale);stage.classList.toggle('show-labels',scale>1.18)}
+function clamp(){const w=mapW*scale,h=mapH*scale,m=Math.min(innerWidth,innerHeight)*.35;posX=Math.min(m,Math.max(innerWidth-w-m,posX));posY=Math.min(m,Math.max(innerHeight-h-m,posY));if(w+m*2<innerWidth)posX=(innerWidth-w)/2;if(h+m*2<innerHeight)posY=(innerHeight-h)/2}
 const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-function animateTo(ts,tx,ty,dur=760,done){
-  if(anim)cancelAnimationFrame(anim);
-  const s0=scale,x0=posX,y0=posY,t0=performance.now();
-  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  if(reduce){scale=ts;posX=tx;posY=ty;clamp();apply();done&&done();return}
-  (function step(now){
-    const k=Math.min(1,(now-t0)/dur),e=ease(k);
-    scale=s0+(ts-s0)*e;posX=x0+(tx-x0)*e;posY=y0+(ty-y0)*e;
-    apply();
-    if(k<1)anim=requestAnimationFrame(step); else {clamp();apply();done&&done()}
-  })(t0);
-}
+function animateTo(ts,tx,ty,dur=760,done){if(anim)cancelAnimationFrame(anim);const s0=scale,x0=posX,y0=posY,t0=performance.now();if(matchMedia('(prefers-reduced-motion:reduce)').matches){scale=ts;posX=tx;posY=ty;clamp();apply();done&&done();return}(function step(now){const k=Math.min(1,(now-t0)/dur),e=ease(k);scale=s0+(ts-s0)*e;posX=x0+(tx-x0)*e;posY=y0+(ty-y0)*e;apply();if(k<1)anim=requestAnimationFrame(step);else{clamp();apply();done&&done()}})(t0)}
 
-/* ---------- viajar a un lugar ---------- */
-function focusLocation(loc,openAfter=true){
-  const mobile=innerWidth<720;
-  const target=Math.min(maxScale, mobile?3.25:2.65);
-  const x=loc.x/100*mapW, y=loc.y/100*mapH;
-  /* en celular el panel ocupa abajo: dejamos el punto arriba */
-  const anchorY = openAfter ? (mobile?innerHeight*.15:innerHeight*.42) : innerHeight*.5;
-  const anchorX = openAfter && !mobile ? (innerWidth-Math.min(400,innerWidth-32))/2 : innerWidth/2;
-  const tx=anchorX-x*target, ty=anchorY-y*target;
-  app.classList.add('dim');
-  hud.classList.add('hud-hide');
-  document.querySelectorAll('.hotspot').forEach(h=>h.classList.toggle('active',h.dataset.id===loc.id));
-  animateTo(target,tx,ty,560,()=>{ if(openAfter) enterScene(loc) });
-}
+function focusLocation(loc){const mobile=innerWidth<720;const target=Math.min(maxScale,mobile?3.35:2.45);const x=loc.x/100*mapW,y=loc.y/100*mapH;const anchorY=mobile?innerHeight*.36:innerHeight*.48;const anchorX=innerWidth/2;const tx=anchorX-x*target,ty=anchorY-y*target;app.classList.add('dim');hud.classList.add('hud-hide');document.querySelectorAll('.hotspot').forEach(h=>h.classList.toggle('active',h.dataset.id===loc.id));animateTo(target,tx,ty,520,()=>enterScene(loc))}
+function addSpot(loc){const x=loc.x/100*mapW,y=loc.y/100*mapH;const b=document.createElement('button');b.className='hotspot '+loc.type;b.dataset.id=loc.id;b.style.left=x+'px';b.style.top=y+'px';b.setAttribute('aria-label',loc.name);b.innerHTML='<span class="spot-hit"></span><span class="mark"><s></s><i></i></span><span class="spot-label">'+loc.name+'</span>';b.addEventListener('click',e=>{e.stopPropagation();focusLocation(loc)});stage.appendChild(b)}
 
-/* ---------- marcadores ---------- */
-function addSpot(loc){
-  const x=loc.x/100*mapW,y=loc.y/100*mapH;
-  const b=document.createElement('button');
-  b.className='hotspot '+loc.type;
-  b.dataset.id=loc.id;
-  b.style.left=x+'px';b.style.top=y+'px';
-  b.setAttribute('aria-label',loc.name);
-  b.innerHTML='<span class="spot-hit"></span><span class="mark"><s></s><i></i></span><span class="spot-label">'+loc.name+'</span>';
-  b.addEventListener('click',e=>{e.stopPropagation();focusLocation(loc)});
-  stage.appendChild(b);
-}
+function resizeSceneCanvas(){const dpr=Math.min(2,window.devicePixelRatio||1);sceneCanvas.width=Math.round(innerWidth*dpr);sceneCanvas.height=Math.round(innerHeight*dpr);sceneCanvas.style.width=innerWidth+'px';sceneCanvas.style.height=innerHeight+'px';sctx.setTransform(dpr,0,0,dpr,0,0);if(scene.classList.contains('open')&&current)drawScene(current)}
 
-/* ---------- entrada cinemática al lugar ---------- */
-function buildParticles(){
-  const box=document.getElementById('scene-particles');
-  if(box.children.length)return;
-  for(let i=0;i<28;i++){
-    const p=document.createElement('i');
-    p.style.left=(Math.random()*100)+'%';p.style.top=(Math.random()*110)+'%';
-    p.style.setProperty('--d',(7+Math.random()*10)+'s');
-    p.style.setProperty('--x',(-35+Math.random()*70)+'px');
-    p.style.animationDelay=(-Math.random()*12)+'s';box.appendChild(p);
+function lerp(a,b,t){return a+(b-a)*t}
+function sky(top,bottom){const g=sctx.createLinearGradient(0,0,0,innerHeight);g.addColorStop(0,top);g.addColorStop(.55,bottom);g.addColorStop(1,'#060606');sctx.fillStyle=g;sctx.fillRect(0,0,innerWidth,innerHeight)}
+function circleGlow(x,y,r,color,a=.35){const g=sctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,hexToRgba(color,a));g.addColorStop(1,hexToRgba(color,0));sctx.fillStyle=g;sctx.beginPath();sctx.arc(x,y,r,0,Math.PI*2);sctx.fill()}
+function hexToRgba(hex,a){const n=hex.replace('#','');const v=n.length===3?n.split('').map(c=>c+c).join(''):n;const num=parseInt(v,16);return `rgba(${(num>>16)&255},${(num>>8)&255},${num&255},${a})`}
+function mountainRange(peaks,baseY,color,snow){sctx.beginPath();sctx.moveTo(0,innerHeight);sctx.lineTo(0,baseY);for(const p of peaks){sctx.lineTo(p.x,p.y)}sctx.lineTo(innerWidth,baseY+40);sctx.lineTo(innerWidth,innerHeight);sctx.closePath();sctx.fillStyle=color;sctx.fill();if(snow){sctx.fillStyle=snow;for(const p of peaks){const left=60,right=70,height=110;sctx.beginPath();sctx.moveTo(p.x,p.y);sctx.lineTo(p.x-left,p.y+height);sctx.lineTo(p.x,p.y+height*.66);sctx.lineTo(p.x+right,p.y+height);sctx.closePath();sctx.fill()}}}
+function ridge(points,color,alpha=1){sctx.save();sctx.globalAlpha=alpha;sctx.beginPath();sctx.moveTo(0,innerHeight);sctx.lineTo(0,points[0].y);for(const p of points)sctx.lineTo(p.x,p.y);sctx.lineTo(innerWidth,innerHeight);sctx.closePath();sctx.fillStyle=color;sctx.fill();sctx.restore()}
+function drawPines(count,baseY,depth,color){for(let i=0;i<count;i++){const x=(i+.4)*innerWidth/count + ((i%3)-1)*18*depth;const h=(70+((i*37)%85))*depth;const w=h*.38;sctx.fillStyle=color;sctx.beginPath();sctx.moveTo(x,baseY-h);sctx.lineTo(x-w*.8,baseY-h*.58);sctx.lineTo(x-w*.35,baseY-h*.58);sctx.lineTo(x-w,baseY);sctx.lineTo(x+w,baseY);sctx.lineTo(x+w*.35,baseY-h*.58);sctx.lineTo(x+w*.8,baseY-h*.58);sctx.closePath();sctx.fill();sctx.fillRect(x-4*depth,baseY,8*depth,18*depth)}}
+function drawWater(y,colorTop,colorBottom){const g=sctx.createLinearGradient(0,y,0,innerHeight);g.addColorStop(0,colorTop);g.addColorStop(1,colorBottom);sctx.fillStyle=g;sctx.fillRect(0,y,innerWidth,innerHeight-y);sctx.strokeStyle='rgba(235,245,255,.16)';sctx.lineWidth=2;for(let i=0;i<6;i++){const yy=y+20+i*34;sctx.beginPath();for(let x=0;x<=innerWidth+60;x+=40){const off=Math.sin((x+i*25)/70)*5;sctx.lineTo(x,yy+off)}sctx.stroke()}}
+function drawCastle(cx,cy,scale=1,color='#111518',win='#d7d4b8'){const w=280*scale,h=160*scale;sctx.fillStyle=color;sctx.fillRect(cx-w/2,cy-h/2,w,h);sctx.fillRect(cx-w/2+18*scale,cy-h/2-70*scale,56*scale,h+70*scale);sctx.fillRect(cx+w/2-74*scale,cy-h/2-55*scale,56*scale,h+55*scale);roof(cx-w/2+46*scale,cy-h/2-70*scale,62*scale,44*scale,color);roof(cx+w/2-46*scale,cy-h/2-55*scale,62*scale,44*scale,color);for(let r=0;r<3;r++){for(let c=0;c<6;c++){windowRect(cx-w/2+25*scale+c*39*scale,cy-h/2+24*scale+r*38*scale,8*scale,12*scale,win)}}}
+function drawTower(x,y,h,color='#0f1114',win='#d8b470'){sctx.fillStyle=color;sctx.fillRect(x-25,y-h,50,h);roof(x,y-h,54,40,color);for(let i=0;i<6;i++)windowRect(x-8,y-h+28+i*(h-50)/6,7,10,win)}
+function roof(cx,top,w,h,color){sctx.fillStyle=color;sctx.beginPath();sctx.moveTo(cx,top-h);sctx.lineTo(cx-w/2,top);sctx.lineTo(cx+w/2,top);sctx.closePath();sctx.fill()}
+function windowRect(x,y,w,h,color){sctx.fillStyle=color;sctx.fillRect(x,y,w,h)}
+function drawCityLine(y,buildings,palette){for(let i=0;i<buildings;i++){const bw=lerp(22,90,((i*29)%100)/100);const bh=lerp(70,240,((i*53)%100)/100);const x=i*(innerWidth/buildings)+((i%3)-1)*8;sctx.fillStyle=palette[i%palette.length];sctx.fillRect(x,y-bh,bw,bh);if(i%5===0)roof(x+bw/2,y-bh,Math.max(22,bw*.7),lerp(18,38,((i*17)%100)/100),palette[i%palette.length]);if(i%6===1)sctx.fillRect(x+bw*.3,y-bh-45,bw*.15,45);for(let r=0;r<Math.max(2,Math.floor(bh/44));r++){for(let c=0;c<Math.max(1,Math.floor(bw/22));c++){windowRect(x+8+c*18,y-bh+10+r*24,5,8,'rgba(241,220,150,.55)')}}}}
+function drawBridge(y){sctx.strokeStyle='rgba(168,145,103,.7)';sctx.lineWidth=6;sctx.beginPath();sctx.moveTo(innerWidth*.24,y);sctx.quadraticCurveTo(innerWidth*.5,y-90,innerWidth*.76,y);sctx.stroke();sctx.lineWidth=2;for(let i=0;i<12;i++){const x=innerWidth*.24 + i*(innerWidth*.52/11);sctx.beginPath();sctx.moveTo(x,y);sctx.lineTo(x, y-18-Math.abs(6-i)*9);sctx.stroke()}}
+function drawVillage(x,y,count){for(let i=0;i<count;i++){const xx=x+i*58;const w=42+((i*17)%16),h=26+((i*23)%18);sctx.fillStyle='#2b231a';sctx.fillRect(xx,y-h,w,h);roof(xx+w/2,y-h,w+8,26,'#21180f');windowRect(xx+9,y-h+8,7,8,'rgba(255,221,160,.5)')}}
+function drawRuins(cx,cy,scale=1){sctx.fillStyle='#5a4735';sctx.fillRect(cx-110*scale,cy-52*scale,220*scale,96*scale);sctx.fillRect(cx-70*scale,cy-110*scale,42*scale,154*scale);sctx.fillRect(cx+28*scale,cy-130*scale,36*scale,174*scale);sctx.beginPath();sctx.moveTo(cx-18*scale,cy+44*scale);sctx.lineTo(cx-18*scale,cy-8*scale);sctx.quadraticCurveTo(cx,cy-80*scale,cx+18*scale,cy-8*scale);sctx.lineTo(cx+18*scale,cy+44*scale);sctx.closePath();sctx.fillStyle='#2f1d12';sctx.fill()}
+function drawLighthouse(x,y,scale=1){sctx.fillStyle='#ddd9cc';sctx.fillRect(x-18*scale,y-120*scale,36*scale,120*scale);sctx.fillStyle='#9e332d';sctx.fillRect(x-18*scale,y-92*scale,36*scale,16*scale);sctx.fillStyle='#ddd9cc';sctx.fillRect(x-18*scale,y-58*scale,36*scale,16*scale);roof(x,y-120*scale,42*scale,24*scale,'#23282d');circleGlow(x,y-120*scale,40*scale,'#fff5d6',.18)}
+function drawRock(x,y,w,h,color){sctx.fillStyle=color;sctx.beginPath();sctx.moveTo(x,y);sctx.lineTo(x+w*.14,y-h*.45);sctx.lineTo(x+w*.36,y-h);sctx.lineTo(x+w*.52,y-h*.62);sctx.lineTo(x+w*.75,y-h*.88);sctx.lineTo(x+w,y-h*.22);sctx.lineTo(x+w*.88,y);sctx.closePath();sctx.fill()}
+function drawSnowDots(count){for(let i=0;i<count;i++){sctx.fillStyle=`rgba(255,255,255,${.12+((i*11)%18)/100})`;const x=(i*97)%innerWidth;const y=(i*43)%innerHeight;const r=1+((i*13)%4)*.3;sctx.beginPath();sctx.arc(x,y,r,0,Math.PI*2);sctx.fill()}}
+function drawDust(count,color='rgba(255,233,181,.09)'){for(let i=0;i<count;i++){sctx.fillStyle=color;const x=(i*83)%innerWidth;const y=(i*61)%innerHeight;const r=1+((i*19)%4)*.6;sctx.beginPath();sctx.arc(x,y,r,0,Math.PI*2);sctx.fill()}}
+function drawCloud(x,y,w,h,a=.14){sctx.fillStyle=`rgba(255,255,255,${a})`;sctx.beginPath();sctx.ellipse(x,y,w*.35,h*.55,0,0,Math.PI*2);sctx.ellipse(x-w*.18,y+5,w*.28,h*.44,0,0,Math.PI*2);sctx.ellipse(x+w*.18,y+8,w*.24,h*.38,0,0,Math.PI*2);sctx.fill()}
+
+function drawScene(loc){resizeIfNeeded(); const w=innerWidth,h=innerHeight; sctx.clearRect(0,0,w,h); const portrait=h>w;
+  switch(loc.id){
+    case 'aethrion': {
+      sky('#6f685e','#221f1a'); circleGlow(w*.72,h*.19,portrait?120:180,'#ead9a4',.22); drawCloud(w*.55,h*.22,portrait?260:420,80,.08);
+      ridge([{x:0,y:h*.60},{x:w*.14,y:h*.54},{x:w*.26,y:h*.58},{x:w*.38,y:h*.52},{x:w*.51,y:h*.57},{x:w*.66,y:h*.50},{x:w*.82,y:h*.56},{x:w,y:h*.53}], '#27261f', .55);
+      drawCityLine(h*.72, portrait?12:18, ['#171611','#211f18','#12110e','#1f1a14']);
+      drawCastle(w*.53, portrait?h*.60:h*.58, portrait?1.05:1.12, '#0b0b0b', '#d6ba74'); drawTower(w*.53, portrait?h*.44:h*.40, portrait?210:250, '#0c0c0c', '#d4b36e');
+      drawWater(h*.79, '#415a60', '#111b1d'); drawBridge(h*.80); ridge([{x:0,y:h*.90},{x:w*.22,y:h*.88},{x:w*.38,y:h*.92},{x:w*.55,y:h*.87},{x:w*.74,y:h*.91},{x:w,y:h*.89}], '#080909');
+      drawDust(70,'rgba(240,220,170,.08)'); break; }
+    case 'velmor': {
+      sky('#99abb1','#23353e'); circleGlow(w*.64,h*.16,portrait?90:140,'#f5fafc',.12);
+      mountainRange([{x:w*.08,y:h*.53},{x:w*.22,y:h*.33},{x:w*.36,y:h*.50},{x:w*.54,y:h*.20},{x:w*.71,y:h*.49},{x:w*.88,y:h*.28}], h*.60, '#5e727b','#eaf1f3');
+      ridge([{x:0,y:h*.70},{x:w*.12,y:h*.62},{x:w*.23,y:h*.69},{x:w*.37,y:h*.56},{x:w*.53,y:h*.70},{x:w*.69,y:h*.61},{x:w*.82,y:h*.71},{x:w,y:h*.64}], '#304049', .78);
+      drawCastle(w*.50, portrait?h*.69:h*.67, portrait?.95:1.1, '#12191d', '#c1d9dd'); drawPines(portrait?9:14,h*.86, portrait?.75:.95,'#0c1313'); ridge([{x:0,y:h*.92},{x:w*.2,y:h*.89},{x:w*.4,y:h*.93},{x:w*.58,y:h*.90},{x:w*.8,y:h*.94},{x:w,y:h*.91}], '#0b1216'); drawSnowDots(80); break; }
+    case 'darvanis': {
+      sky('#7b5f45','#120c08'); circleGlow(w*.22,h*.18,portrait?65:90,'#f2c06d',.28); drawCloud(w*.24,h*.18,portrait?160:260,60,.08);
+      ridge([{x:0,y:h*.66},{x:w*.16,y:h*.58},{x:w*.32,y:h*.62},{x:w*.46,y:h*.57},{x:w*.60,y:h*.60},{x:w*.74,y:h*.54},{x:w*.9,y:h*.59},{x:w,y:h*.56}], '#21150f', .7);
+      drawCityLine(h*.76, portrait?11:17, ['#2a1a14','#1f140f','#160d09','#24160f']); drawTower(w*.74, portrait?h*.61:h*.58, portrait?220:260, '#140d09', '#e3a46b'); ridge([{x:0,y:h*.91},{x:w*.18,y:h*.86},{x:w*.36,y:h*.90},{x:w*.54,y:h*.84},{x:w*.72,y:h*.89},{x:w*.9,y:h*.85},{x:w,y:h*.88}], '#110b08'); drawDust(90,'rgba(255,208,139,.06)'); break; }
+    case 'bosque-korvan': {
+      sky('#708a74','#071109'); circleGlow(w*.56,h*.24,portrait?180:260,'#dfe1aa',.25); for(let i=0;i<4;i++)drawCloud(w*(.25+i*.18),h*(.20+i*.01),portrait?140:230,48,.05);
+      drawPines(portrait?15:24,h*.73, portrait?.82:1,'#183122'); drawPines(portrait?12:18,h*.86, portrait?1.06:1.2,'#09130b');
+      sctx.fillStyle='#2a2015'; sctx.fillRect(w*.47, h*.37, portrait?28:36, h*.41); sctx.fillStyle='#173223';
+      sctx.beginPath(); sctx.moveTo(w*.49,h*.22); sctx.bezierCurveTo(w*.33,h*.28,w*.28,h*.42,w*.40,h*.48); sctx.bezierCurveTo(w*.30,h*.54,w*.36,h*.68,w*.46,h*.64); sctx.bezierCurveTo(w*.50,h*.71,w*.60,h*.70,w*.63,h*.63); sctx.bezierCurveTo(w*.75,h*.68,w*.80,h*.55,w*.70,h*.48); sctx.bezierCurveTo(w*.79,h*.40,w*.72,h*.25,w*.57,h*.29); sctx.bezierCurveTo(w*.55,h*.25,w*.52,h*.22,w*.49,h*.22); sctx.fill();
+      sctx.strokeStyle='rgba(221,212,157,.15)'; sctx.lineWidth=3; for(let i=0;i<4;i++){sctx.beginPath();sctx.moveTo(w*(.42+i*.08),h*.24);sctx.lineTo(w*(.18+i*.18),h*.84);sctx.stroke()} drawDust(80,'rgba(222,240,196,.08)'); break; }
+    case 'tierras-heladas': {
+      sky('#b5c5ca','#1b2830'); circleGlow(w*.50,h*.14,portrait?130:180,'#eef8fb',.18); drawCloud(w*.5,h*.17,portrait?260:420,70,.08);
+      mountainRange([{x:w*.05,y:h*.51},{x:w*.18,y:h*.34},{x:w*.33,y:h*.55},{x:w*.49,y:h*.27},{x:w*.65,y:h*.57},{x:w*.82,y:h*.33},{x:w*.95,y:h*.52}], h*.60, '#6d818b','#f3f7f7');
+      ridge([{x:0,y:h*.73},{x:w*.16,y:h*.64},{x:w*.31,y:h*.72},{x:w*.47,y:h*.60},{x:w*.63,y:h*.74},{x:w*.79,y:h*.63},{x:w*.92,y:h*.72},{x:w,y:h*.68}], '#40535d', .8);
+      sctx.fillStyle='rgba(224,237,240,.78)'; sctx.fillRect(0,h*.82,w,h*.18); drawRock(w*.60,h*.84,portrait?90:110,portrait?80:95,'#b3dde6'); drawRock(w*.68,h*.84,portrait?75:95,portrait?62:84,'#93d0df');
+      ridge([{x:0,y:h*.95},{x:w*.22,y:h*.91},{x:w*.42,y:h*.96},{x:w*.57,y:h*.92},{x:w*.76,y:h*.96},{x:w,y:h*.93}], '#0e1519'); drawSnowDots(110); break; }
+    case 'islas-tronox': {
+      sky('#6f8790','#0d222b'); circleGlow(w*.68,h*.18,portrait?110:150,'#d6d9c8',.12); drawWater(h*.63,'#335f6e','#06171e');
+      drawRock(w*.07,h*.71,portrait?190:240,portrait?160:210,'#1a2825'); drawRock(w*.58,h*.69,portrait?250:320,portrait?200:240,'#1b2723');
+      drawCastle(w*.76, portrait?h*.63:h*.61, portrait?.68:.78,'#18201b','#dbc88b'); drawTower(w*.30, portrait?h*.68:h*.66, portrait?150:170, '#171b18','#dbc88b'); ridge([{x:0,y:h*.92},{x:w*.18,y:h*.88},{x:w*.38,y:h*.93},{x:w*.58,y:h*.89},{x:w*.79,y:h*.94},{x:w,y:h*.9}], '#02080b'); drawDust(40,'rgba(202,224,228,.08)'); break; }
+    case 'valle-arden': {
+      sky('#8c9a7a','#18261c'); circleGlow(w*.73,h*.16,portrait?85:120,'#f1f0b1',.18);
+      ridge([{x:0,y:h*.54},{x:w*.11,y:h*.44},{x:w*.23,y:h*.55},{x:w*.36,y:h*.39},{x:w*.49,y:h*.54},{x:w*.63,y:h*.42},{x:w*.78,y:h*.56},{x:w*.92,y:h*.46},{x:w,y:h*.52}], '#496149', .8);
+      ridge([{x:0,y:h*.69},{x:w*.18,y:h*.57},{x:w*.32,y:h*.70},{x:w*.47,y:h*.56},{x:w*.66,y:h*.68},{x:w*.82,y:h*.58},{x:w,y:h*.67}], '#315033', .85);
+      sctx.fillStyle='rgba(72,112,124,.9)'; sctx.beginPath(); sctx.moveTo(w*.47,h); sctx.quadraticCurveTo(w*.52,h*.78,w*.50,h*.63); sctx.quadraticCurveTo(w*.49,h*.55,w*.54,h*.50); sctx.quadraticCurveTo(w*.61,h*.57,w*.58,h); sctx.closePath(); sctx.fill();
+      drawVillage(w*.16,h*.74, portrait?3:5); drawPines(portrait?8:12,h*.83,.8,'#102118'); ridge([{x:0,y:h*.95},{x:w*.18,y:h*.91},{x:w*.36,y:h*.96},{x:w*.56,y:h*.9},{x:w*.78,y:h*.95},{x:w,y:h*.91}], '#142119'); drawDust(45,'rgba(246,238,185,.06)'); break; }
+    case 'lagos-eldra': {
+      sky('#819a9c','#132830'); circleGlow(w*.63,h*.17,portrait?95:130,'#edf1d3',.16); drawWater(h*.60,'#4d7377','#0d1d24');
+      ridge([{x:0,y:h*.58},{x:w*.15,y:h*.46},{x:w*.3,y:h*.59},{x:w*.44,y:h*.45},{x:w*.58,y:h*.58},{x:w*.77,y:h*.48},{x:w*.92,y:h*.57},{x:w,y:h*.54}], '#294346', .7);
+      drawVillage(w*.16,h*.64, portrait?2:3); drawRock(w*.70,h*.61,portrait?120:140,portrait?160:180,'#343433'); sctx.fillStyle='#5f5548'; sctx.beginPath(); sctx.moveTo(w*.73,h*.50); sctx.lineTo(w*.75,h*.43); sctx.lineTo(w*.77,h*.50); sctx.fill(); ridge([{x:0,y:h*.92},{x:w*.18,y:h*.87},{x:w*.34,y:h*.93},{x:w*.55,y:h*.88},{x:w*.74,y:h*.94},{x:w,y:h*.89}], '#081216'); drawDust(35,'rgba(228,236,201,.08)'); break; }
+    case 'desierto-kael': {
+      sky('#c28b55','#402514'); circleGlow(w*.73,h*.16,portrait?90:110,'#ffe1a3',.38);
+      ridge([{x:0,y:h*.66},{x:w*.18,y:h*.57},{x:w*.36,y:h*.68},{x:w*.54,y:h*.54},{x:w*.72,y:h*.66},{x:w*.88,y:h*.58},{x:w,y:h*.64}], '#a56335', .92);
+      ridge([{x:0,y:h*.79},{x:w*.2,y:h*.69},{x:w*.41,y:h*.80},{x:w*.62,y:h*.67},{x:w*.83,y:h*.79},{x:w,y:h*.72}], '#71401f', .95);
+      drawRuins(w*.58, portrait?h*.68:h*.65, portrait?.8:.95); ridge([{x:0,y:h*.95},{x:w*.18,y:h*.9},{x:w*.36,y:h*.96},{x:w*.57,y:h*.89},{x:w*.77,y:h*.95},{x:w,y:h*.91}], '#2a170d'); drawDust(120,'rgba(255,231,183,.1)'); break; }
+    case 'serynth': {
+      sky('#9c6c5a','#160d0d'); circleGlow(w*.72,h*.17,portrait?100:140,'#f0b58e',.18);
+      drawCityLine(h*.76, portrait?11:16, ['#2a1a19','#3a2524','#211515','#2e1d1c']);
+      sctx.fillStyle='#4a2e2b'; sctx.beginPath(); sctx.ellipse(w*.35, portrait?h*.70:h*.68, portrait?95:135, portrait?42:55,0,0,Math.PI*2); sctx.fill(); sctx.beginPath(); sctx.moveTo(w*.26,portrait?h*.70:h*.68); sctx.quadraticCurveTo(w*.35,portrait?h*.52:h*.50,w*.44,portrait?h*.70:h*.68); sctx.closePath(); sctx.fill(); sctx.fillStyle='#2b1b19'; sctx.fillRect(w*.27,portrait?h*.70:h*.68, portrait?150:210, portrait?92:120);
+      drawTower(w*.76, portrait?h*.62:h*.58, portrait?240:280, '#211515','#f0a36c'); ridge([{x:0,y:h*.93},{x:w*.18,y:h*.88},{x:w*.37,y:h*.95},{x:w*.56,y:h*.89},{x:w*.77,y:h*.95},{x:w,y:h*.9}], '#100909'); drawDust(60,'rgba(246,183,139,.08)'); break; }
+    case 'colinas-vorlen': {
+      sky('#81735e','#1c1711'); circleGlow(w*.67,h*.16,portrait?85:120,'#e6d6b0',.14);
+      ridge([{x:0,y:h*.60},{x:w*.11,y:h*.46},{x:w*.24,y:h*.60},{x:w*.38,y:h*.42},{x:w*.52,y:h*.61},{x:w*.69,y:h*.49},{x:w*.84,y:h*.61},{x:w,y:h*.52}], '#574e40', .88);
+      ridge([{x:0,y:h*.76},{x:w*.18,y:h*.64},{x:w*.37,y:h*.77},{x:w*.56,y:h*.62},{x:w*.76,y:h*.79},{x:w,y:h*.67}], '#302b22', .95);
+      sctx.strokeStyle='rgba(166,109,70,.7)'; sctx.lineWidth=10; sctx.beginPath(); sctx.moveTo(w*.30,h*.82); sctx.lineTo(w*.36,h*.73); sctx.lineTo(w*.42,h*.82); sctx.stroke(); sctx.beginPath(); sctx.moveTo(w*.33,h*.82); sctx.lineTo(w*.33,h*.75); sctx.moveTo(w*.39,h*.82); sctx.lineTo(w*.39,h*.75); sctx.stroke(); drawRock(w*.68,h*.80,portrait?160:210,portrait?160:190,'#1f1c16'); sctx.fillStyle='#0d0b09'; sctx.fillRect(w*.735,h*.69,portrait?38:52,portrait?90:120); sctx.fillStyle='#5b3b2d'; sctx.fillRect(w*.75,h*.66,10,portrait?115:145); drawDust(50,'rgba(229,210,170,.05)'); break; }
+    case 'puerto-libar': {
+      sky('#7d949a','#09171e'); circleGlow(w*.70,h*.18,portrait?90:120,'#ebf1d5',.15); drawWater(h*.62,'#345965','#07171e');
+      drawVillage(w*.12,h*.67, portrait?2:3); drawLighthouse(w*.25, h*.64, portrait?.88:1.0); drawCastle(w*.73, portrait?h*.61:h*.58, portrait?.88:1.0, '#1b1e1c', '#ddcb9e');
+      sctx.fillStyle='rgba(220,228,230,.22)'; sctx.beginPath(); sctx.moveTo(w*.46,h*.74); sctx.lineTo(w*.52,h*.63); sctx.lineTo(w*.57,h*.74); sctx.closePath(); sctx.fill(); sctx.fillStyle='#1e2528'; sctx.fillRect(w*.505,h*.74,8,46);
+      ridge([{x:0,y:h*.93},{x:w*.2,y:h*.89},{x:w*.38,y:h*.94},{x:w*.58,y:h*.89},{x:w*.77,y:h*.95},{x:w,y:h*.91}], '#030b0f'); drawDust(35,'rgba(213,231,233,.08)'); break; }
+    case 'mar-oeste': {
+      sky('#394b55','#0a171d'); circleGlow(w*.26,h*.17,portrait?70:100,'#cad4db',.08); drawCloud(w*.22,h*.18,portrait?180:260,56,.07); drawCloud(w*.72,h*.16,portrait?220:320,66,.08);
+      drawWater(h*.56,'#244854','#06141a'); drawRock(w*.66,h*.82,portrait?160:210,portrait?220:260,'#111a1d'); drawLighthouse(w*.73,h*.61,portrait?.8:.95); drawRock(w*.18,h*.80,portrait?90:120,portrait?110:140,'#172125');
+      sctx.strokeStyle='rgba(215,227,229,.38)'; sctx.lineWidth=8; sctx.beginPath(); sctx.moveTo(w*.46,h*.48); sctx.lineTo(w*.43,h*.56); sctx.lineTo(w*.48,h*.54); sctx.lineTo(w*.45,h*.66); sctx.stroke(); ridge([{x:0,y:h*.93},{x:w*.17,y:h*.89},{x:w*.35,y:h*.95},{x:w*.58,y:h*.9},{x:w*.78,y:h*.96},{x:w,y:h*.92}], '#02080b'); drawDust(24,'rgba(215,228,235,.07)'); break; }
   }
 }
-/* ---------- PANORÁMICAS ILUSTRADAS ÚNICAS ---------- */
-function svgData(svg){return `url("data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}")`}
-function noiseDefs(){return `<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="2" seed="17"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .12"/></feComponentTransfer></filter><filter id="blur"><feGaussianBlur stdDeviation="22"/></filter>`}
-function stars(n=55){let h='';for(let i=0;i<n;i++){const x=(i*137)%1600,y=(i*71)%520,r=(i%5===0?1.8:1);h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="#fff6d6" opacity="${.13+(i%7)/40}"/>`}return h}
-function pines(count=34,y0=690,scale=1){let h='';for(let i=0;i<count;i++){const x=(i*83)%1660-30;const hgt=(90+(i*37)%170)*scale;const y=y0+((i*29)%55);const dark=i%3===0?'#102019':i%3===1?'#18291e':'#0a1510';h+=`<g transform="translate(${x} ${y})"><rect x="-5" y="-${hgt*.48}" width="10" height="${hgt*.52}" fill="#34281b"/><polygon points="0,-${hgt} -${hgt*.24},-${hgt*.35} ${hgt*.24},-${hgt*.35}" fill="${dark}"/><polygon points="0,-${hgt*.78} -${hgt*.3},-${hgt*.16} ${hgt*.3},-${hgt*.16}" fill="${dark}"/></g>`}return h}
-function windows(x,y,w,h,rows,cols,color='#e8bc67'){let out='';for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){if((r+c*2)%5===0)continue;out+=`<rect x="${x+12+c*(w-24)/Math.max(1,cols-1)-3}" y="${y+18+r*(h-38)/Math.max(1,rows-1)-4}" width="6" height="8" rx="1" fill="${color}" opacity="${.45+((r+c)%3)*.16}"/>`}return out}
-function cityBlocks(seed=0,warm=false){let h='';for(let i=0;i<17;i++){const x=-30+i*100+(i%3)*13;const bw=78+(i*19)%62,bh=120+(i*47+seed)%230;const y=780-bh;const fill=warm?(i%2?'#4c3228':'#38251f'):(i%2?'#22211e':'#171817');h+=`<g><rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="3" fill="${fill}"/><polygon points="${x-7},${y} ${x+bw/2},${y-38-(i%4)*16} ${x+bw+7},${y}" fill="#11110f"/>${windows(x,y,bw,bh,Math.max(2,Math.floor(bh/52)),3,warm?'#f0a866':'#d8bd78')}</g>`}return h}
-function water(){let h='';for(let i=0;i<17;i++){const y=650+i*15;h+=`<path d="M0 ${y} Q 100 ${y-10} 200 ${y} T400 ${y} T600 ${y} T800 ${y} T1000 ${y} T1200 ${y} T1400 ${y} T1600 ${y}" fill="none" stroke="#b8d7d8" stroke-opacity="${.12+(i%4)*.035}" stroke-width="2"/>`}return h}
-function sceneAethrion(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#756b5e"/><stop offset=".48" stop-color="#4b4438"/><stop offset="1" stop-color="#11100e"/></linearGradient><linearGradient id="can" x2="0" y2="1"><stop stop-color="#506466"/><stop offset="1" stop-color="#111b1d"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><ellipse cx="1180" cy="220" rx="260" ry="100" fill="#ead7a0" opacity=".11" filter="url(#blur)"/><path d="M0 570 Q260 520 460 565 T850 555 T1220 540 T1600 570 V900 H0Z" fill="#151512"/><g opacity=".96">${cityBlocks(8,false)}</g><g transform="translate(705 140)"><rect x="0" y="180" width="190" height="500" fill="#090a09"/><polygon points="95,0 20,180 170,180" fill="#060706"/><rect x="55" y="120" width="80" height="560" fill="#0d0e0d"/><polygon points="95,40 62,120 128,120" fill="#030403"/>${windows(55,150,80,500,9,2,'#e6c778')}</g><path d="M0 730 H1600 V900 H0Z" fill="url(#can)"/><path d="M0 746 Q130 730 260 746 T520 746 T780 746 T1040 746 T1300 746 T1600 746" fill="none" stroke="#d2c59f" opacity=".17" stroke-width="3"/><g fill="#27251f"><path d="M500 740 Q800 610 1100 740 L1100 785 H500Z"/><path d="M545 735 Q800 650 1055 735" fill="none" stroke="#9c8757" stroke-width="12" opacity=".55"/></g><rect width="1600" height="900" filter="url(#grain)" opacity=".18"/></svg>`}
-function sceneDarvanis(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#775c42"/><stop offset=".5" stop-color="#3b2b20"/><stop offset="1" stop-color="#100b08"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><circle cx="310" cy="225" r="88" fill="#f2c16e" opacity=".18"/><path d="M0 620 Q250 540 490 600 T930 590 T1320 560 T1600 610 V900 H0Z" fill="#18110c"/>${cityBlocks(41,true)}<g transform="translate(1140 215)"><rect x="0" y="150" width="175" height="420" fill="#21140f"/><polygon points="87,0 0,150 175,150" fill="#130c08"/>${windows(0,150,175,420,7,3,'#f0a15c')}</g><g opacity=".78"><path d="M0 790 H1600 V900 H0Z" fill="#120c09"/><path d="M100 810 C360 730 520 830 760 770 S1160 750 1500 815" fill="none" stroke="#6c4b2c" stroke-width="18"/></g><rect width="1600" height="900" filter="url(#grain)" opacity=".2"/></svg>`}
-function sceneSerynth(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#9c6c5a"/><stop offset=".52" stop-color="#53352f"/><stop offset="1" stop-color="#160d0d"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><ellipse cx="1250" cy="210" rx="280" ry="120" fill="#f5b18b" opacity=".12" filter="url(#blur)"/>${cityBlocks(73,true)}<g transform="translate(520 370)"><ellipse cx="160" cy="210" rx="180" ry="85" fill="#2a1a19"/><path d="M20 210 Q160 30 300 210Z" fill="#4a2e2b"/><rect x="28" y="210" width="264" height="160" fill="#2b1b19"/>${windows(28,210,264,160,3,6,'#f2af75')}</g><g transform="translate(1220 225)"><rect x="0" y="160" width="95" height="390" fill="#241717"/><path d="M0 160 L15 70 L32 160 L48 10 L64 160 L80 95 L95 160" fill="#171011"/>${windows(0,180,95,360,7,2,'#f0a36c')}</g><path d="M0 780 Q300 735 560 785 T1060 770 T1600 790 V900 H0Z" fill="#100909"/><rect width="1600" height="900" filter="url(#grain)" opacity=".18"/></svg>`}
-function sceneKorvan(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#6f8971"/><stop offset=".42" stop-color="#344d3b"/><stop offset="1" stop-color="#07110b"/></linearGradient><radialGradient id="ray"><stop stop-color="#e4dda6" stop-opacity=".42"/><stop offset="1" stop-color="#e4dda6" stop-opacity="0"/></radialGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><ellipse cx="930" cy="260" rx="420" ry="180" fill="url(#ray)"/><g opacity=".55">${pines(26,690,.72)}</g><g transform="translate(690 110)"><rect x="-55" y="140" width="110" height="650" rx="36" fill="#2a2117"/><path d="M0 20 C-210 120 -250 260 -175 340 C-280 410 -245 535 -90 500 C-35 570 75 555 105 495 C265 535 310 395 200 330 C285 235 210 105 55 125 C25 70 0 20 0 20Z" fill="#173322"/><path d="M-45 160 C-140 320 -110 520 -10 650" fill="none" stroke="#58422c" stroke-width="18" opacity=".5"/></g><g opacity=".92">${pines(42,815,1.05)}</g><path d="M0 825 Q250 760 470 820 T900 805 T1270 790 T1600 820 V900 H0Z" fill="#07100a"/><g stroke="#c7c17f" stroke-opacity=".22" stroke-width="5"><path d="M920 250 L620 850"/><path d="M1030 220 L820 850"/><path d="M1150 245 L1040 850"/></g><rect width="1600" height="900" filter="url(#grain)" opacity=".18"/></svg>`}
-function sceneArden(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#8c9a7a"/><stop offset=".5" stop-color="#5b7153"/><stop offset="1" stop-color="#18261c"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><path d="M0 500 Q180 360 360 500 Q560 310 760 500 Q960 340 1170 510 Q1380 390 1600 510 V900 H0Z" fill="#415a40"/><path d="M0 610 Q270 470 520 620 T1000 600 T1600 625 V900 H0Z" fill="#2c472f"/><path d="M0 800 C350 690 480 830 800 720 S1250 715 1600 795 V900 H0Z" fill="#16281a"/><path d="M610 900 C650 760 735 685 800 655 C865 690 940 770 980 900Z" fill="#456f79" opacity=".82"/><g transform="translate(270 610)" fill="#33271d"><rect x="0" y="40" width="105" height="75"/><polygon points="-10,40 52,-5 115,40"/><rect x="145" y="50" width="85" height="65"/><polygon points="135,50 187,10 240,50"/></g>${pines(22,770,.55)}<rect width="1600" height="900" filter="url(#grain)" opacity=".14"/></svg>`}
-function sceneVelmor(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#94a6ad"/><stop offset=".53" stop-color="#50636b"/><stop offset="1" stop-color="#142026"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><path d="M0 620 L210 340 L380 570 L600 180 L820 580 L1080 275 L1260 565 L1460 235 L1600 480 V900 H0Z" fill="#566b75"/><path d="M380 570 L600 180 L690 500 L600 405 L520 515Z" fill="#dce6e8" opacity=".86"/><path d="M980 480 L1080 275 L1160 500 L1080 420 L1010 515Z" fill="#e8eff0" opacity=".82"/><path d="M1300 500 L1460 235 L1535 470 L1465 400 L1390 520Z" fill="#edf3f4" opacity=".82"/><g transform="translate(610 430)"><rect x="0" y="80" width="390" height="250" fill="#1a2225"/><rect x="35" y="0" width="85" height="330" fill="#151c1f"/><rect x="270" y="20" width="85" height="310" fill="#151c1f"/><polygon points="77,-70 25,0 129,0" fill="#111719"/><polygon points="312,-50 260,20 365,20" fill="#111719"/>${windows(0,80,390,250,4,7,'#b8d4d8')}</g><path d="M0 770 Q250 720 520 760 T1100 755 T1600 765 V900 H0Z" fill="#162227"/>${pines(28,825,.65)}<rect width="1600" height="900" filter="url(#grain)" opacity=".16"/></svg>`}
-function sceneFrozen(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#b6c6ca"/><stop offset=".5" stop-color="#6f828b"/><stop offset="1" stop-color="#1a2830"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><path d="M0 650 L140 420 L300 590 L470 250 L650 610 L840 120 L1010 620 L1200 300 L1380 620 L1540 350 L1600 460 V900 H0Z" fill="#637983"/><path d="M300 590 L470 250 L560 520 L470 430 L400 545Z" fill="#e9f1f2"/><path d="M650 610 L840 120 L930 510 L840 345 L755 560Z" fill="#f2f6f6"/><path d="M1040 600 L1200 300 L1290 540 L1200 445 L1130 565Z" fill="#e4edef"/><path d="M0 755 Q300 720 620 760 T1200 750 T1600 760 V900 H0Z" fill="#d7e4e7" opacity=".7"/><g transform="translate(1110 585)" opacity=".72"><polygon points="0,120 58,0 115,120" fill="#bce5ec"/><polygon points="75,120 135,25 195,120" fill="#9ed8e4"/><rect x="45" y="90" width="110" height="60" fill="#7ebdca"/></g><g fill="#fff" opacity=".42">${stars(42)}</g><rect width="1600" height="900" filter="url(#grain)" opacity=".14"/></svg>`}
-function sceneTronox(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#6f8890"/><stop offset=".48" stop-color="#35545f"/><stop offset="1" stop-color="#0d222b"/></linearGradient><linearGradient id="sea" x2="0" y2="1"><stop stop-color="#335f6e"/><stop offset="1" stop-color="#07171e"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><rect y="545" width="1600" height="355" fill="url(#sea)"/>${water()}<path d="M100 610 Q250 430 430 600 L510 660 H60Z" fill="#1d2a27"/><path d="M910 590 Q1110 345 1320 580 L1450 680 H800Z" fill="#192622"/><g transform="translate(1090 405)"><rect x="0" y="95" width="210" height="150" fill="#20241f"/><rect x="35" y="20" width="55" height="225" fill="#161a17"/><rect x="132" y="0" width="45" height="245" fill="#151916"/><polygon points="62,-35 28,20 98,20" fill="#111411"/><polygon points="154,-28 125,0 183,0" fill="#111411"/>${windows(0,95,210,150,3,4,'#dbc88b')}</g><g transform="translate(315 510)"><rect x="0" y="25" width="85" height="120" fill="#1d211d"/><rect x="28" y="-45" width="28" height="190" fill="#171b18"/><polygon points="42,-80 20,-45 64,-45" fill="#121512"/></g><rect width="1600" height="900" filter="url(#grain)" opacity=".14"/></svg>`}
-function sceneEldra(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#7e989a"/><stop offset=".48" stop-color="#496e72"/><stop offset="1" stop-color="#17353b"/></linearGradient><linearGradient id="sea" x2="0" y2="1"><stop stop-color="#497d82"/><stop offset="1" stop-color="#15383d"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><path d="M0 510 Q250 360 480 525 T950 500 T1350 470 T1600 520 V610 H0Z" fill="#304d42"/><rect y="555" width="1600" height="345" fill="url(#sea)"/>${water()}<g transform="translate(220 545)" fill="#3a2e25"><rect x="0" y="40" width="110" height="80"/><polygon points="-10,40 55,-5 120,40"/><rect x="145" y="52" width="92" height="68"/><polygon points="135,52 190,18 247,52"/></g><g transform="translate(1180 470)"><path d="M0 210 Q35 30 120 0 Q205 40 240 210Z" fill="#34443f"/><path d="M82 80 Q120 35 155 85 L155 210 H82Z" fill="#1d2825"/></g><path d="M730 900 C750 760 770 640 810 555 C850 650 870 780 890 900Z" fill="#2b666f" opacity=".45"/><rect width="1600" height="900" filter="url(#grain)" opacity=".14"/></svg>`}
-function sceneLibar(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#9a9a8c"/><stop offset=".5" stop-color="#5b747a"/><stop offset="1" stop-color="#17313a"/></linearGradient><linearGradient id="sea" x2="0" y2="1"><stop stop-color="#49717d"/><stop offset="1" stop-color="#0c222b"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><rect y="600" width="1600" height="300" fill="url(#sea)"/>${water()}<g transform="translate(510 315)"><rect x="0" y="170" width="600" height="215" fill="#d0c7ae"/><rect x="80" y="85" width="100" height="300" fill="#b9af96"/><rect x="420" y="65" width="100" height="320" fill="#b9af96"/><polygon points="130,0 62,85 198,85" fill="#6b655a"/><polygon points="470,-20 400,65 540,65" fill="#6b655a"/><rect x="245" y="115" width="110" height="270" fill="#c7bea5"/><path d="M245 115 Q300 35 355 115Z" fill="#83796a"/>${windows(0,170,600,210,4,10,'#9b7d46')}</g><g fill="#1f2322"><path d="M80 720 H520 V760 H80Z"/><path d="M1120 735 H1510 V770 H1120Z"/></g><g transform="translate(1320 445)"><rect x="0" y="70" width="48" height="230" fill="#e3dfcf"/><polygon points="24,0 0,70 48,70" fill="#5b4b3d"/><rect x="12" y="95" width="24" height="42" fill="#efc66f"/></g><rect width="1600" height="900" filter="url(#grain)" opacity=".14"/></svg>`}
-function sceneWestSea(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#394b55"/><stop offset=".5" stop-color="#21343f"/><stop offset="1" stop-color="#0a171d"/></linearGradient><linearGradient id="sea" x2="0" y2="1"><stop stop-color="#244854"/><stop offset="1" stop-color="#06141a"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><g fill="#b9cad1" opacity=".16" filter="url(#blur)"><ellipse cx="360" cy="190" rx="330" ry="85"/><ellipse cx="1120" cy="160" rx="400" ry="95"/></g><rect y="515" width="1600" height="385" fill="url(#sea)"/>${water()}<path d="M1060 755 Q1120 500 1200 350 Q1265 520 1290 755Z" fill="#111a1d"/><path d="M1174 420 Q1200 360 1227 430" fill="none" stroke="#62747b" stroke-width="9"/><g transform="translate(420 610)" fill="#172125"><path d="M0 180 Q90 0 180 180Z"/><rect x="62" y="70" width="56" height="120"/></g><path d="M820 420 L785 520 L835 505 L800 630" fill="none" stroke="#d7e3e5" stroke-width="8" opacity=".38"/><rect width="1600" height="900" filter="url(#grain)" opacity=".16"/></svg>`}
-function sceneKael(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#c28b55"/><stop offset=".5" stop-color="#8c5b32"/><stop offset="1" stop-color="#402514"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><circle cx="1260" cy="185" r="95" fill="#ffe1a2" opacity=".35"/><path d="M0 650 Q250 510 520 650 T1000 620 T1600 650 V900 H0Z" fill="#9a5b2f"/><path d="M0 770 Q330 610 700 760 T1280 730 T1600 760 V900 H0Z" fill="#663918"/><g transform="translate(645 410)"><rect x="0" y="100" width="310" height="240" fill="#6c4a31"/><rect x="45" y="25" width="70" height="315" fill="#745036"/><rect x="205" y="0" width="65" height="340" fill="#6c492f"/><path d="M110 340 V210 Q155 135 200 210 V340Z" fill="#2f1d12"/><g stroke="#b98a5d" opacity=".48"><path d="M25 140 H285"/><path d="M25 185 H285"/><path d="M25 230 H285"/></g></g><path d="M590 900 Q700 700 800 690 Q900 710 1010 900Z" fill="#49301d" opacity=".42"/><rect width="1600" height="900" filter="url(#grain)" opacity=".17"/></svg>`}
-function sceneVorlen(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs>${noiseDefs()}<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#81735e"/><stop offset=".5" stop-color="#544837"/><stop offset="1" stop-color="#1c1711"/></linearGradient></defs><rect width="1600" height="900" fill="url(#sky)"/><path d="M0 620 Q170 410 340 610 Q520 350 720 620 Q910 430 1100 620 Q1280 390 1600 620 V900 H0Z" fill="#4b4437"/><path d="M0 740 Q260 560 500 730 T980 700 T1600 735 V900 H0Z" fill="#29251d"/><g transform="translate(1050 560)"><path d="M0 190 L150 0 L300 190Z" fill="#201c16"/><rect x="116" y="80" width="68" height="120" fill="#0d0b09"/><rect x="132" y="60" width="12" height="140" fill="#5b3b2d"/><rect x="162" y="40" width="12" height="160" fill="#5b3b2d"/></g><g transform="translate(330 640)" stroke="#a66d46" stroke-width="12" fill="none" opacity=".55"><path d="M0 120 L110 0 L200 120"/><path d="M60 120 V35 M145 120 V35"/></g><rect width="1600" height="900" filter="url(#grain)" opacity=".18"/></svg>`}
-function panoramaFor(loc){
-  const custom={
-    'aethrion':sceneAethrion,'darvanis':sceneDarvanis,'serynth':sceneSerynth,
-    'bosque-korvan':sceneKorvan,'valle-arden':sceneArden,'velmor':sceneVelmor,
-    'tierras-heladas':sceneFrozen,'islas-tronox':sceneTronox,'lagos-eldra':sceneEldra,
-    'puerto-libar':sceneLibar,'mar-oeste':sceneWestSea,'desierto-kael':sceneKael,'colinas-vorlen':sceneVorlen
-  };
-  return (custom[loc.id]||sceneAethrion)();
-}
-function enterScene(loc){
-  current=loc; buildParticles();
-  scene.className='scene-'+(loc.scene||'city');
-  if(loc.sceneImg){sceneBg.style.backgroundImage=`url('${loc.sceneImg}')`;}
-  else{sceneBg.style.backgroundImage=svgData(panoramaFor(loc));}
-  document.getElementById('scene-type').textContent=loc.label;
-  document.getElementById('scene-name').textContent=loc.name;
-  document.getElementById('scene-short').textContent=loc.short||'';
-  scene.classList.add('open'); scene.setAttribute('aria-hidden','false');
-  setTimeout(()=>scene.focus?.(),0);
-}
-function leaveScene(){
-  scene.classList.remove('open'); scene.setAttribute('aria-hidden','true');
-  panel.classList.remove('panel-open'); app.classList.remove('dim'); hud.classList.remove('hud-hide');
-  current=null; document.querySelectorAll('.hotspot').forEach(h=>h.classList.remove('active'));
-}
-function openCurrentPanel(){ if(current) openPanel(current); }
-
-/* ---------- panel ---------- */
-function heroFor(loc){
-  /* si hay ilustración propia la usa; si no, recorta el mapa en ese punto */
-  if(loc.img){
-    hero.style.backgroundImage=`url('${loc.img}')`;
-    hero.style.backgroundSize='cover';
-    hero.style.backgroundPosition='center';
-    return;
-  }
-  const w=hero.clientWidth||360,h=hero.clientHeight||190;
-  const Z=Math.max(3.4,(w/mapW)*4.2);          /* primer plano del mapa */
-  const bw=mapW*Z,bh=mapH*Z;
-  const px=loc.x/100*bw-w/2, py=loc.y/100*bh-h/2;
-  hero.style.backgroundImage=`url('${img.getAttribute('src')}')`;
-  hero.style.backgroundSize=bw+'px '+bh+'px';
-  hero.style.backgroundPosition=(-px)+'px '+(-py)+'px';
-}
-function openPanel(loc){
-  current=loc;
-  document.getElementById('p-type').textContent=loc.label;
-  document.getElementById('p-name').textContent=loc.name;
-  heroFor(loc);
-  let h=`<section class="sec"><div class="sec-title">Descripción</div><p>${loc.desc}</p></section>`;
-  if(loc.stats){h+='<section class="sec"><div class="sec-title">Datos</div><div class="stats">';Object.entries(loc.stats).forEach(([k,v])=>h+=`<div class="stat"><small>${k}</small><b>${v}</b></div>`);h+='</div></section>'}
-  if(loc.districts){h+='<section class="sec"><div class="sec-title">Dentro de Aethrion</div><div class="districts">';loc.districts.forEach(d=>h+=`<div class="district"><b>${d[0]}</b><span>${d[1]}</span></div>`);h+='</div></section>'}
-  if(loc.lore)h+=`<section class="sec"><div class="sec-title">Crónicas</div><div class="quote">${loc.lore}</div></section>`;
-  if(loc.places){h+='<section class="sec"><div class="sec-title">Lugares</div>';loc.places.forEach(p=>h+=`<div class="place">${p}</div>`);h+='</section>'}
-  h+=`<div class="p-nav"><button onclick="goSibling(-1)">‹ Anterior</button><button onclick="resetView()">Ver todo</button><button onclick="goSibling(1)">Siguiente ›</button></div>`;
-  document.getElementById('p-body').innerHTML=h;
-  document.querySelector('.panel-body').scrollTop=0;
-  panel.classList.add('panel-open');
-}
-function goSibling(d){
-  if(!current)return;
-  const i=locations.findIndex(l=>l.id===current.id);
-  const next=locations[(i+d+locations.length)%locations.length];
-  panel.classList.remove('panel-open');
-  setTimeout(()=>focusLocation(next),140);
-}
-function closePanel(){
-  panel.classList.remove('panel-open');
-  if(scene.classList.contains('open')) return;
-  current=null; app.classList.remove('dim'); hud.classList.remove('hud-hide');
-  document.querySelectorAll('.hotspot').forEach(h=>h.classList.remove('active'));
-}
-
-/* ---------- encuadre ---------- */
-function fitMap(animated){
-  const pad=(innerWidth<720?20:80);
-  const s=Math.max(.2,Math.min((innerWidth-pad)/mapW,(innerHeight-pad)/mapH));
-  minScale=s*.8;
-  const tx=(innerWidth-mapW*s)/2, ty=(innerHeight-mapH*s)/2;
-  if(animated) animateTo(s,tx,ty,700); else {scale=s;posX=tx;posY=ty;apply()}
-}
+function resizeIfNeeded(){const dpr=Math.min(2,window.devicePixelRatio||1); if(sceneCanvas.width!==Math.round(innerWidth*dpr) || sceneCanvas.height!==Math.round(innerHeight*dpr)) resizeSceneCanvas() }
+function enterScene(loc){current=loc; document.getElementById('scene-type').textContent=loc.label; document.getElementById('scene-name').textContent=loc.name; document.getElementById('scene-short').textContent=loc.short||''; drawScene(loc); scene.classList.add('open'); scene.setAttribute('aria-hidden','false')}
+function leaveScene(){scene.classList.remove('open'); scene.setAttribute('aria-hidden','true'); panel.classList.remove('panel-open'); app.classList.remove('dim'); hud.classList.remove('hud-hide'); current=null; document.querySelectorAll('.hotspot').forEach(h=>h.classList.remove('active'))}
+function openCurrentPanel(){if(current) openPanel(current)}
+function sceneSnapshot(loc){drawScene(loc); try{return sceneCanvas.toDataURL('image/jpeg',.92)}catch(e){return null}}
+function heroFor(loc){const shot=sceneSnapshot(loc); if(shot){hero.style.backgroundImage=`url('${shot}')`; hero.style.backgroundSize='cover'; hero.style.backgroundPosition='center'; return;} const w=hero.clientWidth||360,h=hero.clientHeight||190;const Z=Math.max(3.4,(w/mapW)*4.2);const bw=mapW*Z,bh=mapH*Z;const px=loc.x/100*bw-w/2,py=loc.y/100*bh-h/2;hero.style.backgroundImage=`url('${img.getAttribute('src')}')`;hero.style.backgroundSize=bw+'px '+bh+'px';hero.style.backgroundPosition=(-px)+'px '+(-py)+'px'}
+function openPanel(loc){current=loc;document.getElementById('p-type').textContent=loc.label;document.getElementById('p-name').textContent=loc.name;heroFor(loc);let h=`<section class="sec"><div class="sec-title">Descripción</div><p>${loc.desc}</p></section>`;if(loc.stats){h+='<section class="sec"><div class="sec-title">Datos</div><div class="stats">';Object.entries(loc.stats).forEach(([k,v])=>h+=`<div class="stat"><small>${k}</small><b>${v}</b></div>`);h+='</div></section>'}if(loc.lore)h+=`<section class="sec"><div class="sec-title">Crónicas</div><div class="quote">${loc.lore}</div></section>`;if(loc.places){h+='<section class="sec"><div class="sec-title">Lugares</div>';loc.places.forEach(p=>h+=`<div class="place">${p}</div>`);h+='</section>'}h+=`<div class="p-nav"><button onclick="goSibling(-1)">‹ Anterior</button><button onclick="resetView()">Ver todo</button><button onclick="goSibling(1)">Siguiente ›</button></div>`;document.getElementById('p-body').innerHTML=h;document.querySelector('.panel-body').scrollTop=0;panel.classList.add('panel-open')}
+function goSibling(d){if(!current)return;const i=locations.findIndex(l=>l.id===current.id);const next=locations[(i+d+locations.length)%locations.length];panel.classList.remove('panel-open');setTimeout(()=>focusLocation(next),140)}
+function closePanel(){panel.classList.remove('panel-open'); if(scene.classList.contains('open')) return; current=null; app.classList.remove('dim'); hud.classList.remove('hud-hide'); document.querySelectorAll('.hotspot').forEach(h=>h.classList.remove('active'))}
+function fitMap(animated){const pad=(innerWidth<720?20:80);const s=Math.max(.2,Math.min((innerWidth-pad)/mapW,(innerHeight-pad)/mapH));minScale=s*.8;const tx=(innerWidth-mapW*s)/2,ty=(innerHeight-mapH*s)/2;if(animated) animateTo(s,tx,ty,700);else{scale=s;posX=tx;posY=ty;apply()}}
 function resetView(){if(scene.classList.contains('open'))leaveScene();else closePanel();fitMap(true)}
-function zoomAt(cx,cy,f){
-  const bx=(cx-posX)/scale,by=(cy-posY)/scale;
-  scale=Math.max(minScale,Math.min(maxScale,scale*f));
-  posX=cx-bx*scale;posY=cy-by*scale;clamp();apply();
-}
-function zoomAtCenter(f){
-  if(anim)cancelAnimationFrame(anim);
-  const cx=innerWidth/2,cy=innerHeight/2;
-  const bx=(cx-posX)/scale,by=(cy-posY)/scale;
-  const ts=Math.max(minScale,Math.min(maxScale,scale*f));
-  animateTo(ts,cx-bx*ts,cy-by*ts,340);
-}
+function zoomAt(cx,cy,f){const bx=(cx-posX)/scale,by=(cy-posY)/scale;scale=Math.max(minScale,Math.min(maxScale,scale*f));posX=cx-bx*scale;posY=cy-by*scale;clamp();apply()}
+function zoomAtCenter(f){if(anim)cancelAnimationFrame(anim);const cx=innerWidth/2,cy=innerHeight/2;const bx=(cx-posX)/scale,by=(cy-posY)/scale;const ts=Math.max(minScale,Math.min(maxScale,scale*f));animateTo(ts,cx-bx*ts,cy-by*ts,340)}
 
-/* ---------- gestos ---------- */
-wrap.addEventListener('mousedown',e=>{if(e.target.closest('.hotspot'))return;if(anim)cancelAnimationFrame(anim);drag=true;dragged=false;wrap.classList.add('dragging');startX=e.clientX-posX;startY=e.clientY-posY});
-addEventListener('mousemove',e=>{if(!drag)return;dragged=true;posX=e.clientX-startX;posY=e.clientY-startY;clamp();apply()});
-addEventListener('mouseup',()=>{drag=false;wrap.classList.remove('dragging')});
+wrap.addEventListener('mousedown',e=>{if(e.target.closest('.hotspot'))return;if(anim)cancelAnimationFrame(anim);drag=true;wrap.classList.add('dragging');startX=e.clientX-posX;startY=e.clientY-posY});
+addEventListener('mousemove',e=>{if(!drag)return;posX=e.clientX-startX;posY=e.clientY-startY;clamp();apply()});addEventListener('mouseup',()=>{drag=false;wrap.classList.remove('dragging')});
 wrap.addEventListener('wheel',e=>{e.preventDefault();if(anim)cancelAnimationFrame(anim);zoomAt(e.clientX,e.clientY,e.deltaY<0?1.12:.89)},{passive:false});
-wrap.addEventListener('touchstart',e=>{
-  if(anim)cancelAnimationFrame(anim);
-  if(e.touches.length===1){startX=e.touches[0].clientX-posX;startY=e.touches[0].clientY-posY}
-  else if(e.touches.length===2){lastDist=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY)}
-},{passive:true});
-wrap.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  if(e.touches.length===1&&!e.target.closest('.hotspot')){posX=e.touches[0].clientX-startX;posY=e.touches[0].clientY-startY;clamp();apply()}
-  else if(e.touches.length===2&&lastDist){
-    const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);
-    const cx=(e.touches[0].clientX+e.touches[1].clientX)/2,cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
-    zoomAt(cx,cy,d/lastDist);lastDist=d;
-  }
-},{passive:false});
-/* doble toque / doble click: acerca donde tocaste */
-let lastTap=0;
-wrap.addEventListener('touchend',e=>{
-  const now=Date.now();
-  if(now-lastTap<300&&e.changedTouches.length===1&&!e.target.closest('.hotspot')){
-    const t=e.changedTouches[0],bx=(t.clientX-posX)/scale,by=(t.clientY-posY)/scale;
-    const ts=scale<1.8?2.6:minScale*1.25;
-    animateTo(ts,t.clientX-bx*ts,t.clientY-by*ts,420);
-  }
-  lastTap=now;
-});
-wrap.addEventListener('dblclick',e=>{
-  if(e.target.closest('.hotspot'))return;
-  const bx=(e.clientX-posX)/scale,by=(e.clientY-posY)/scale;
-  const ts=scale<1.8?2.2:minScale*1.25;
-  animateTo(ts,e.clientX-bx*ts,e.clientY-by*ts,420);
-});
-addEventListener('keydown',e=>{if(e.key==='Escape'){ if(panel.classList.contains('panel-open')) closePanel(); else if(scene.classList.contains('open')) leaveScene(); else resetView(); }});
-
-/* ---------- extras ---------- */
+wrap.addEventListener('touchstart',e=>{if(anim)cancelAnimationFrame(anim);if(e.touches.length===1){startX=e.touches[0].clientX-posX;startY=e.touches[0].clientY-posY}else if(e.touches.length===2){lastDist=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY)}},{passive:true});
+wrap.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&!e.target.closest('.hotspot')){posX=e.touches[0].clientX-startX;posY=e.touches[0].clientY-startY;clamp();apply()}else if(e.touches.length===2&&lastDist){const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);const cx=(e.touches[0].clientX+e.touches[1].clientX)/2,cy=(e.touches[0].clientY+e.touches[1].clientY)/2;zoomAt(cx,cy,d/lastDist);lastDist=d}},{passive:false});
+let lastTap=0;wrap.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTap<300&&e.changedTouches.length===1&&!e.target.closest('.hotspot')){const t=e.changedTouches[0],bx=(t.clientX-posX)/scale,by=(t.clientY-posY)/scale;const ts=scale<1.8?2.6:minScale*1.25;animateTo(ts,t.clientX-bx*ts,t.clientY-by*ts,420)}lastTap=now});
+wrap.addEventListener('dblclick',e=>{if(e.target.closest('.hotspot'))return;const bx=(e.clientX-posX)/scale,by=(e.clientY-posY)/scale;const ts=scale<1.8?2.2:minScale*1.25;animateTo(ts,e.clientX-bx*ts,e.clientY-by*ts,420)});
+addEventListener('keydown',e=>{if(e.key==='Escape')resetView()});
 function toggleLegend(){document.getElementById('legend').classList.toggle('legend-open');document.getElementById('legend-btn').classList.toggle('active')}
 function toggleMusic(){const a=document.getElementById('ambience'),btn=document.getElementById('music-btn');if(a.paused){a.play().then(()=>{btn.classList.add('active');btn.textContent='♬'}).catch(()=>{alert('Poné tu archivo de música como ambiente-cetrios.mp3 en la misma carpeta que este HTML.')})}else{a.pause();btn.classList.remove('active');btn.textContent='♪'}}
-
-/* ---------- init ---------- */
-function setup(){
-  mapW=900;mapH=mapW*((img.naturalHeight||1100)/(img.naturalWidth||900));
-  locations.forEach(addSpot);
-  fitMap(false);
-  setTimeout(()=>{const l=document.getElementById('loading');l.classList.add('loading-done');setTimeout(()=>l?.remove(),800)},900);
-}
-addEventListener('resize',()=>{if(!current)fitMap(false)});
-if(img.complete)setup();else img.onload=setup;
+function setup(){mapW=900;mapH=mapW*((img.naturalHeight||1100)/(img.naturalWidth||900));locations.forEach(addSpot);fitMap(false);resizeSceneCanvas();setTimeout(()=>{const l=document.getElementById('loading');l.classList.add('loading-done');setTimeout(()=>l?.remove(),800)},900)}
+addEventListener('resize',()=>{if(!current)fitMap(false); resizeSceneCanvas()}); if(img.complete)setup(); else img.onload=setup;
 </script>
 </body>
 </html>
