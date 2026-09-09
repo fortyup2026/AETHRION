@@ -1,294 +1,63 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>CETRIOS — Mapa Interactivo Final</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<style>
-:root{
-  --gold:#c9a84c;--gold2:#f1d889;--gold3:#755518;--dark:#050302;
-  --line:rgba(201,168,76,.26);--green:#68b295;--red:#d63e3e;
-  --inv:1;
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;width:100%;overflow:hidden;background:#030201;color:var(--gold2);font-family:'Crimson Text',serif}
-button{font-family:inherit}
-#app{position:fixed;inset:0;background:radial-gradient(circle at 50% 35%,rgba(80,55,18,.12),transparent 40%),#030201;overflow:hidden}
-#map-wrap{position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab;background:linear-gradient(180deg,#050302,#010101)}
-#map-wrap.dragging{cursor:grabbing}
-#map-stage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
-#map-img{display:block;width:900px;height:auto;user-select:none;-webkit-user-drag:none;filter:saturate(1.05) contrast(1.04) brightness(.9);box-shadow:0 0 80px rgba(0,0,0,.8)}
-#vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 45%,transparent 48%,rgba(0,0,0,.72) 100%);z-index:4;transition:opacity .4s}
-.dim #vignette{opacity:.45}
-
-#hud{position:fixed;z-index:20;top:max(18px,env(safe-area-inset-top));left:18px;right:18px;pointer-events:none;transition:opacity .35s,transform .35s}
-.hud-hide{opacity:0;transform:translateY(-12px)}
-.hud-copy{max-width:min(520px,72vw);text-shadow:0 2px 18px #000}
-.hud-kicker{font-family:'Cinzel',serif;font-size:11px;letter-spacing:8px;color:var(--gold);text-transform:uppercase;opacity:.8}
-.hud-title{font-family:'Cinzel',serif;font-size:clamp(38px,7vw,78px);line-height:.9;font-weight:900;color:var(--gold2);text-shadow:0 0 28px rgba(201,168,76,.25)}
-.hud-sub{font-size:clamp(14px,2.8vw,20px);color:#c9a974;font-style:italic;line-height:1.35;margin-top:8px;max-width:560px}
-.hud-hint{margin-top:14px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--gold3);text-transform:uppercase}
-
-.hotspot{position:absolute;z-index:10;border:0;background:transparent;cursor:pointer;transform:translate(-50%,-50%) scale(var(--inv));transform-origin:50% 50%;transition:filter .2s}
-.spot-hit{position:absolute;left:-28px;top:-28px;width:56px;height:56px;border-radius:50%}
-.mark{position:relative;width:16px;height:16px;display:block}
-.mark i{position:absolute;inset:0;transform:rotate(45deg);background:linear-gradient(140deg,#fff3c4,var(--gold) 55%,#8a6a22);border:1px solid rgba(255,240,190,.85);box-shadow:0 0 9px rgba(201,168,76,.75),0 2px 6px rgba(0,0,0,.9)}
-.mark s{position:absolute;left:50%;top:50%;width:36px;height:36px;margin:-18px 0 0 -18px;border:1px solid rgba(201,168,76,.45);border-radius:50%;animation:pulse 3.2s ease-in-out infinite}
-.hotspot.capital .mark{width:21px;height:21px}
-.hotspot.capital .mark i{background:linear-gradient(140deg,#fff8dd,#ffe08a 50%,var(--gold));box-shadow:0 0 16px rgba(255,224,138,.85),0 0 34px rgba(201,168,76,.5)}
-.hotspot.region .mark i{background:linear-gradient(140deg,#d8ffe9,#5fa682 60%,#2f5f49);border-color:rgba(200,255,225,.7);box-shadow:0 0 9px rgba(104,178,149,.7),0 2px 6px rgba(0,0,0,.9)}
-.hotspot.region .mark s{border-color:rgba(104,178,149,.4)}
-.hotspot.danger .mark i{background:linear-gradient(140deg,#ffb0b0,#c61e1e 60%,#6d0f0f);border-color:rgba(255,190,190,.7);box-shadow:0 0 9px rgba(214,62,62,.75),0 2px 6px rgba(0,0,0,.9)}
-.hotspot.danger .mark s{border-color:rgba(214,62,62,.38)}
-.hotspot:active{filter:brightness(1.4)}
-@keyframes pulse{0%,100%{transform:scale(.7);opacity:.15}50%{transform:scale(1.05);opacity:.5}}
-.spot-label{position:absolute;left:50%;top:16px;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:13px;letter-spacing:1.2px;text-transform:uppercase;color:#f4e3ac;white-space:nowrap;padding:6px 10px;border-radius:8px;background:rgba(4,3,1,.72);border:1px solid rgba(201,168,76,.28);text-shadow:0 2px 6px #000;opacity:0;transition:opacity .25s;pointer-events:none}
-.show-labels .spot-label{opacity:1}
-.hotspot.capital .spot-label{opacity:1;font-size:14px;color:#fff1bd;border-color:rgba(201,168,76,.5)}
-.hotspot.active .mark i{box-shadow:0 0 20px #fff0aa,0 0 44px rgba(201,168,76,.8)}
-
-#panel{position:fixed;z-index:80;right:16px;top:16px;bottom:16px;width:min(400px,calc(100vw - 32px));background:linear-gradient(160deg,rgba(12,9,4,.97),rgba(4,3,2,.97));border:1px solid var(--gold3);box-shadow:0 24px 80px rgba(0,0,0,.85);transform:translateX(calc(100% + 28px));transition:transform .42s cubic-bezier(.2,.85,.2,1);overflow:hidden;display:flex;flex-direction:column}
-.panel-open{transform:translateX(0)!important}
-#p-hero{position:relative;height:190px;flex:0 0 auto;background-color:#0a0704;background-repeat:no-repeat;border-bottom:1px solid rgba(201,168,76,.22);transform:scale(1.06);opacity:0;transition:transform .7s cubic-bezier(.2,.85,.2,1),opacity .5s}
-.panel-open #p-hero{transform:scale(1);opacity:1}
-#p-hero:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,2,1,.15) 0%,rgba(3,2,1,.55) 55%,rgba(6,4,2,.97) 100%), radial-gradient(circle at 50% 45%,transparent 30%,rgba(0,0,0,.45) 100%)}
-.hero-caption{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:18px 24px 14px}
-.panel-type{font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:7px;text-shadow:0 2px 10px #000}
-.panel-name{font-family:'Cinzel',serif;font-size:29px;font-weight:900;color:var(--gold2);line-height:1;text-shadow:0 3px 22px #000,0 0 30px rgba(201,168,76,.3)}
-.panel-close{position:absolute;right:14px;top:14px;z-index:5;width:38px;height:38px;background:rgba(5,3,1,.6);border:1px solid var(--gold3);color:var(--gold2);font-size:18px;cursor:pointer;backdrop-filter:blur(6px)}
-.panel-body{padding:22px 24px 34px;overflow:auto;flex:1 1 auto}
-.sec{margin-bottom:22px}.sec-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold3);padding-bottom:7px;border-bottom:1px solid rgba(201,168,76,.15);margin-bottom:10px}
-.sec p{font-size:15px;color:#b89d5e;line-height:1.65}.sec em{color:var(--gold2);font-style:normal}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{border:1px solid rgba(201,168,76,.13);background:rgba(201,168,76,.045);padding:10px}.stat small{display:block;font-family:'Cinzel',serif;color:var(--gold3);font-size:8px;letter-spacing:2px;text-transform:uppercase}.stat b{display:block;margin-top:4px;color:var(--gold2);font-size:13px}
-.quote{border-left:2px solid var(--gold3);background:rgba(201,168,76,.035);padding:11px 14px;color:#927941;font-style:italic;line-height:1.55}
-.place{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid rgba(201,168,76,.08);color:#d0b26c}.place:before{content:'◆';font-size:10px;color:var(--gold3)}
-.districts{display:grid;grid-template-columns:1fr;gap:9px}.district{background:rgba(201,168,76,.045);border:1px solid rgba(201,168,76,.14);padding:11px 12px}.district b{font-family:'Cinzel',serif;color:var(--gold2);font-size:13px}.district span{display:block;color:#9d854d;font-size:13px;line-height:1.35;margin-top:3px}
-.p-nav{display:flex;gap:8px;margin-top:6px}.p-nav button{flex:1;padding:11px 8px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.22);color:var(--gold2);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer}.p-nav button:active{background:rgba(201,168,76,.2)}
-
-#scene{position:fixed;inset:0;z-index:70;overflow:hidden;background:#050403;opacity:0;pointer-events:none;transition:opacity .28s ease}
-#scene.open{opacity:1;pointer-events:auto}
-#scene-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-#scene-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,2,1,.06),rgba(3,2,1,.03) 46%,rgba(3,2,1,.76));box-shadow:inset 0 0 140px rgba(0,0,0,.45)}
-#scene-overlay:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 52% 35%,transparent 0 38%,rgba(0,0,0,.1) 74%,rgba(0,0,0,.35))}
-#scene-overlay:after{content:'';position:absolute;left:-10%;right:-10%;bottom:-8%;height:28%;background:linear-gradient(180deg,transparent,rgba(0,0,0,.88));filter:blur(8px)}
-.scene-top{position:absolute;top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));z-index:4}
-.scene-back{padding:11px 14px;background:rgba(8,6,3,.72);border:1px solid rgba(201,168,76,.24);color:#e8d294;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;border-radius:8px;backdrop-filter:blur(12px);cursor:pointer}
-.scene-card{position:absolute;z-index:4;left:min(34px,4vw);bottom:min(26px,4vw);width:min(560px,calc(100vw - 68px));padding:26px 28px;background:linear-gradient(115deg,rgba(7,5,3,.8),rgba(7,5,3,.52));border:1px solid rgba(241,216,137,.36);border-radius:16px;backdrop-filter:blur(14px);box-shadow:0 20px 60px rgba(0,0,0,.35)}
-.scene-type{font-family:'Cinzel',serif;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:#c7a454;opacity:.9}
-.scene-name{font-family:'Cinzel',serif;font-size:clamp(42px,7vw,64px);line-height:.94;font-weight:900;color:#f3dd9c;text-shadow:0 4px 26px rgba(0,0,0,.55)}
-.scene-short{font-size:22px;line-height:1.42;color:#ddc78b;margin-top:12px;max-width:620px}
-.scene-enter{margin-top:17px;border:1px solid rgba(241,216,137,.5);background:rgba(201,168,76,.12);color:#f5df9c;padding:12px 15px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:8px}
-.scene-enter:hover{background:rgba(201,168,76,.22)}
-
-#controls{position:fixed;z-index:30;left:max(18px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
-.ctrl{width:46px;height:46px;background:rgba(6,4,2,.82);border:1px solid var(--gold3);color:var(--gold2);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
-.ctrl:active{background:rgba(201,168,76,.22)}
-#right-actions{position:fixed;z-index:30;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
-.round{width:50px;height:50px;border-radius:50%;border:1px solid var(--gold3);background:rgba(6,4,2,.84);color:var(--gold2);font-size:21px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 35px rgba(0,0,0,.55);backdrop-filter:blur(12px)}
-.round.active{background:radial-gradient(circle,rgba(201,168,76,.32),rgba(6,4,2,.9));box-shadow:0 0 24px rgba(201,168,76,.28)}
-#legend{position:fixed;z-index:45;right:max(78px,calc(env(safe-area-inset-right) + 78px));bottom:max(18px,env(safe-area-inset-bottom));width:min(290px,calc(100vw - 112px));background:rgba(7,5,2,.94);border:1px solid var(--gold3);box-shadow:0 20px 60px rgba(0,0,0,.75);padding:15px 17px;backdrop-filter:blur(15px);transform:translateY(15px) scale(.98);opacity:0;pointer-events:none;transition:.22s}
-.legend-open{opacity:1!important;transform:translateY(0) scale(1)!important;pointer-events:auto!important}.legend-title{font-family:'Cinzel',serif;color:var(--gold2);font-size:11px;letter-spacing:4px;margin-bottom:12px}.legend-row{display:flex;align-items:center;gap:11px;font-family:'Cinzel',serif;color:#a58a50;font-size:11px;letter-spacing:1.5px;margin:9px 0}
-.ld{width:12px;height:12px;flex:0 0 auto;transform:rotate(45deg)}.ld.cap{background:linear-gradient(140deg,#fff8dd,var(--gold))}.ld.city{background:linear-gradient(140deg,#fff3c4,var(--gold) 55%,#8a6a22)}.ld.reg{background:linear-gradient(140deg,#d8ffe9,#5fa682)}.ld.dan{background:linear-gradient(140deg,#ffb0b0,#c61e1e)}
-#loading{position:fixed;z-index:999;inset:0;background:#030201;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .7s}.loading-done{opacity:0;pointer-events:none}.load-title{font-family:'Cinzel',serif;font-size:clamp(42px,10vw,72px);letter-spacing:14px;color:var(--gold);text-shadow:0 0 45px rgba(201,168,76,.35)}.load-sub{font-style:italic;color:#927941}.loadbar{width:min(320px,70vw);height:2px;background:rgba(201,168,76,.12);overflow:hidden}.loadbar:after{content:'';display:block;width:55%;height:100%;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:load 1.4s infinite}
-@keyframes load{from{transform:translateX(-120%)}to{transform:translateX(220%)}}
-
-@media(max-width:720px){
-  #hud{top:14px;left:14px;right:14px}.hud-copy{max-width:78vw}.hud-kicker{font-size:9px;letter-spacing:5px}.hud-title{font-size:42px}.hud-sub{font-size:15px;max-width:280px}
-  #panel{left:0;right:0;top:auto;bottom:0;width:100%;height:74vh;border-left:0;border-right:0;border-bottom:0;border-radius:20px 20px 0 0;transform:translateY(105%)} .panel-open{transform:translateY(0)!important}
-  #p-hero{height:168px;border-radius:20px 20px 0 0}.panel-name{font-size:25px}.panel-body{padding:18px 22px 40px}.stats{grid-template-columns:1fr}.ctrl{width:42px;height:42px}.round{width:48px;height:48px}.spot-label{font-size:11.5px;padding:5px 8px}
-  #legend{right:76px;bottom:18px;width:calc(100vw - 106px)}
-  .scene-card{padding:18px 18px;bottom:14px;width:calc(100vw - 28px);left:14px}.scene-name{font-size:clamp(34px,10vw,48px)}.scene-short{font-size:16px}.scene-enter{width:100%}
-}
-@media(max-height:560px){#panel{height:88vh}.hud-sub{display:none}.hud-title{font-size:34px}}
-@media (prefers-reduced-motion:reduce){#p-hero{transition:none}}
-</style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080e13"><meta name="description" content="Explorá el mundo de Cetrios. Girá el planeta, descubrí sus reinos y viajá a sus paisajes.">
+<title>Cetrios · El mundo de los ecos</title>
+<link rel="icon" href="assets/compass.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div id="app">
-  <div id="loading"><div class="load-title">CETRIOS</div><div class="load-sub">Abriendo los caminos de Cetrios...</div><div class="loadbar"></div></div>
-
-  <div id="hud"><div class="hud-copy">
-    <div class="hud-kicker">Mapa del Mundo</div>
-    <div class="hud-title">CETRIOS</div>
-    <div class="hud-sub">Un mundo de reinos antiguos, donde los Ecos despiertan entre montañas y mares.</div>
-    <div class="hud-hint">Tocá un punto para viajar</div>
-  </div></div>
-
-  <div id="map-wrap"><div id="map-stage"><img id="map-img" src="map.png" alt="Mapa de Cetrios" draggable="false"></div></div>
-  <div id="vignette"></div>
-
-  <section id="scene" aria-hidden="true">
-    <canvas id="scene-canvas"></canvas>
-    <div id="scene-overlay"></div>
-    <div class="scene-top"><button class="scene-back" onclick="leaveScene()">← Volver al mapa</button></div>
-    <div class="scene-card"><div class="scene-type" id="scene-type"></div><div class="scene-name" id="scene-name"></div><div class="scene-short" id="scene-short"></div><button class="scene-enter" onclick="openCurrentPanel()">Explorar este lugar</button></div>
-  </section>
-
-  <aside id="panel">
-    <button class="panel-close" onclick="closePanel()" aria-label="Cerrar">×</button>
-    <div id="p-hero"><div class="hero-caption"><div class="panel-type" id="p-type"></div><div class="panel-name" id="p-name"></div></div></div>
-    <div class="panel-body" id="p-body"></div>
-  </aside>
-
-  <div id="controls"><button class="ctrl" onclick="zoomAtCenter(1.25)" aria-label="Acercar">+</button><button class="ctrl" onclick="zoomAtCenter(.8)" aria-label="Alejar">−</button><button class="ctrl" onclick="resetView()" style="font-size:17px" aria-label="Ver todo el mapa">⌂</button></div>
-  <div id="right-actions"><button id="legend-btn" class="round" onclick="toggleLegend()" aria-label="Leyenda">?</button><button id="music-btn" class="round" onclick="toggleMusic()" aria-label="Música">♪</button></div>
-  <div id="legend"><div class="legend-title">LEYENDA</div><div class="legend-row"><span class="ld cap"></span>Capital</div><div class="legend-row"><span class="ld city"></span>Ciudad / Reino</div><div class="legend-row"><span class="ld reg"></span>Región / Bosque</div><div class="legend-row"><span class="ld dan"></span>Zona peligrosa</div></div>
-  <audio id="ambience" src="ambiente-cetrios.mp3" loop preload="none"></audio>
-</div>
-
-<script>
-const locations=[
-{id:'aethrion',x:50,y:44,type:'capital',label:'Capital',name:'Aethrion',short:'El corazón palpitante de Cetrios.',stats:{Población:'~800.000',Clima:'Templado',Importancia:'Reino central'},desc:`<em>Aethrion</em> es la capital de Cetrios: una ciudad circular amurallada, construida alrededor del Palacio Negro. Sus anillos interiores concentran mercados, templos del Eco, pasajes nobles y rutas ocultas que bajan hacia antiguos túneles.`,lore:`“Quien domina Aethrion no domina solamente un palacio. Domina el símbolo que todos los reinos miran antes de decidir si obedecen o se rebelan.”`,places:['Palacio Negro','Mercado de los Siete Velos','Murallas internas','Canales y puentes','Catacumbas antiguas']},
-{id:'velmor',x:34,y:24,type:'city',label:'Reino',name:'Velmor',short:'El reino frío de las montañas del norte.',stats:{Clima:'Glacial',Carácter:'Aislado'},desc:`<em>Velmor</em> es un reino de piedra, bosque y frío. Sus torres oscuras emergen entre montañas y árboles antiguos.`,lore:`“En Velmor, el viento recuerda mejor que los libros.”`,places:['Fortaleza de Velmor','Puesto de Hielo','Rutas del Norte']},
-{id:'darvanis',x:21,y:52,type:'city',label:'Ciudad-Estado',name:'Darvanis',short:'Ciudad de mercaderes, pactos y secretos.',stats:{Comercio:'Muy alto',Influencia:'Subterránea'},desc:`<em>Darvanis</em> compra lo que no puede conquistar y vende lo que otros temen preguntar.`,lore:`“Si un secreto tiene precio, Darvanis ya lo tasó.”`,places:['Mercado negro','Torre de gremios','Rutas de contrabando']},
-{id:'bosque-korvan',x:62,y:22,type:'region',label:'Región',name:'Bosque de Korvan',short:'El bosque que respira y recuerda.',stats:{Acceso:'Restringido',Misterio:'Alto'},desc:`El <em>Bosque de Korvan</em> guarda memorias antiguas. En el Claro del Eco, las almas parecen hablar más fuerte.`,lore:`“No todos los árboles dan sombra. Algunos guardan nombres.”`,places:['Claro del Eco','Árbol Madre','Senderos ocultos']},
-{id:'tierras-heladas',x:50,y:6,type:'danger',label:'Zona peligrosa',name:'Tierras Heladas',short:'Más allá del norte, pocos regresan.',stats:{Peligro:'Extremo',Clima:'Letal'},desc:`Las <em>Tierras Heladas</em> son el límite del mundo conocido. Allí el mapa deja de prometer respuestas.`,lore:`“El norte no mata rápido. Primero te convence de quedarte.”`,places:['Montañas blancas','Rutas perdidas','Ciudad de cristal — leyenda']},
-{id:'islas-tronox',x:84,y:36,type:'region',label:'Archipiélago',name:'Islas de Tronox',short:'Tronox Mayor y Tronox Menor.',stats:{Gobierno:'Consejo',Acceso:'Marítimo'},desc:`Las <em>Islas de Tronox</em> están separadas de Cetrios por aguas difíciles. Tronox Mayor concentra poder; Tronox Menor conserva secretos antiguos.`,lore:`“En Tronox no se pregunta quién manda. Se pregunta quién sobrevivió para contarlo.”`,places:['Tronox Mayor','Tronox Menor','Puertos ocultos']},
-{id:'valle-arden',x:50,y:68,type:'region',label:'Valle',name:'Valle de Arden',short:'Refugio, reconstrucción y tierra fértil.',stats:{Clima:'Templado',Importancia:'Refugio'},desc:`El <em>Valle de Arden</em> es fértil, protegido y disputado. Allí algunos encuentran libertad lejos del peso de Aethrion.`,lore:`“Arden no promete salvarte. Solo te da espacio para volver a levantarte.”`,places:['Liedor','Cicus','Refugios antiguos']},
-{id:'lagos-eldra',x:30,y:68,type:'region',label:'Región lacustre',name:'Lagos de Eldra',short:'Aguas profundas y puertos antiguos.',stats:{Agua:'Abundante',Peligro:'Moderado'},desc:`Los <em>Lagos de Eldra</em> conectan pueblos, puertos y memorias que el agua nunca termina de devolver.`,lore:`“Eldra escucha incluso cuando nadie habla.”`,places:['Puerto de Eldra','Puerto Inlet','Roca del Guardián']},
-{id:'desierto-kael',x:70,y:82,type:'danger',label:'Desierto',name:'Desierto de Kael',short:'Bajo sus ruinas duerme Murmex.',stats:{Peligro:'Muy alto',Agua:'Escasa'},desc:`El <em>Desierto de Kael</em> oculta ruinas enterradas bajo capas de arena. Allí se busca a Murmex: no como una criatura visible, sino como una presencia antigua escondida bajo el mundo.`,lore:`“Kael no guarda muertos. Guarda puertas.”`,places:['Ruinas de Kael','Entrada perdida','Cámaras bajo la arena','Murmex dormido']},
-{id:'serynth',x:46,y:88,type:'city',label:'Ciudad',name:'Serynth',short:'Ciudad de artistas, fugitivos y exiliados.',stats:{Arte:'Alto',Clima:'Cálido'},desc:`<em>Serynth</em> recibe a quienes no encajan en ningún otro sitio de Cetrios.`,lore:`“Serynth no pregunta de dónde venís. Pregunta qué vas a cantar cuando sobrevivas.”`,places:['Teatro del Último Acto','Mercado de memorias','Torre incompleta']},
-{id:'colinas-vorlen',x:68,y:58,type:'region',label:'Región',name:'Colinas de Vorlen',short:'Viejas alianzas y nuevas traiciones.',stats:{Minería:'Alta',Política:'Inestable'},desc:`Las <em>Colinas de Vorlen</em> son ricas en minerales y pobres en paz.`,lore:`“En Vorlen, una colina puede cambiar de dueño antes del atardecer.”`,places:['Vorten','Minas de hierro rojo','Paso del Acuerdo Roto']},
-{id:'puerto-libar',x:80,y:58,type:'city',label:'Puerto',name:'Puerto de Libar',short:'Un puerto pequeño con un palacio imposible.',stats:{Población:'~8.000',Clima:'Marino'},desc:`<em>Puerto de Libar</em> vive del mar, pero todos lo recuerdan por su palacio desproporcionado y hermoso.`,lore:`“En Libar hay más palacio que pueblo.”`,places:['Palacio de Libar','Puerto pesquero','Faro antiguo']},
-{id:'mar-oeste',x:8,y:62,type:'danger',label:'Mar',name:'Mar del Oeste',short:'Aguas que se defienden solas.',stats:{Peligro:'Extremo',Rutas:'Abandonadas'},desc:`El <em>Mar del Oeste</em> es una frontera líquida que Cetrios nunca logró dominar.`,lore:`“No necesita guardianes. Se defiende solo.”`,places:['Roca del Guardián','Lomír','Bahía del Naufragio']}
-];
-
-const stage=document.getElementById('map-stage'),img=document.getElementById('map-img'),wrap=document.getElementById('map-wrap'),panel=document.getElementById('panel'),hero=document.getElementById('p-hero'),hud=document.getElementById('hud'),app=document.getElementById('app');
-const scene=document.getElementById('scene');
-const sceneCanvas=document.getElementById('scene-canvas');
-const sctx=sceneCanvas.getContext('2d');
-let mapW=900,mapH=1100,scale=1,posX=0,posY=0,minScale=.35,maxScale=5;
-let drag=false,startX=0,startY=0,lastDist=0,anim=null,current=null;
-
-function apply(){stage.style.transform=`translate(${posX}px,${posY}px) scale(${scale})`;stage.style.setProperty('--inv',1/scale);stage.classList.toggle('show-labels',scale>1.18)}
-function clamp(){const w=mapW*scale,h=mapH*scale,m=Math.min(innerWidth,innerHeight)*.35;posX=Math.min(m,Math.max(innerWidth-w-m,posX));posY=Math.min(m,Math.max(innerHeight-h-m,posY));if(w+m*2<innerWidth)posX=(innerWidth-w)/2;if(h+m*2<innerHeight)posY=(innerHeight-h)/2}
-const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-function animateTo(ts,tx,ty,dur=760,done){if(anim)cancelAnimationFrame(anim);const s0=scale,x0=posX,y0=posY,t0=performance.now();if(matchMedia('(prefers-reduced-motion:reduce)').matches){scale=ts;posX=tx;posY=ty;clamp();apply();done&&done();return}(function step(now){const k=Math.min(1,(now-t0)/dur),e=ease(k);scale=s0+(ts-s0)*e;posX=x0+(tx-x0)*e;posY=y0+(ty-y0)*e;apply();if(k<1)anim=requestAnimationFrame(step);else{clamp();apply();done&&done()}})(t0)}
-
-function focusLocation(loc){const mobile=innerWidth<720;const target=Math.min(maxScale,mobile?3.35:2.45);const x=loc.x/100*mapW,y=loc.y/100*mapH;const anchorY=mobile?innerHeight*.36:innerHeight*.48;const anchorX=innerWidth/2;const tx=anchorX-x*target,ty=anchorY-y*target;app.classList.add('dim');hud.classList.add('hud-hide');document.querySelectorAll('.hotspot').forEach(h=>h.classList.toggle('active',h.dataset.id===loc.id));animateTo(target,tx,ty,520,()=>enterScene(loc))}
-function addSpot(loc){const x=loc.x/100*mapW,y=loc.y/100*mapH;const b=document.createElement('button');b.className='hotspot '+loc.type;b.dataset.id=loc.id;b.style.left=x+'px';b.style.top=y+'px';b.setAttribute('aria-label',loc.name);b.innerHTML='<span class="spot-hit"></span><span class="mark"><s></s><i></i></span><span class="spot-label">'+loc.name+'</span>';b.addEventListener('click',e=>{e.stopPropagation();focusLocation(loc)});stage.appendChild(b)}
-
-function resizeSceneCanvas(){const dpr=Math.min(2,window.devicePixelRatio||1);sceneCanvas.width=Math.round(innerWidth*dpr);sceneCanvas.height=Math.round(innerHeight*dpr);sceneCanvas.style.width=innerWidth+'px';sceneCanvas.style.height=innerHeight+'px';sctx.setTransform(dpr,0,0,dpr,0,0);if(scene.classList.contains('open')&&current)drawScene(current)}
-
-function lerp(a,b,t){return a+(b-a)*t}
-function sky(top,bottom){const g=sctx.createLinearGradient(0,0,0,innerHeight);g.addColorStop(0,top);g.addColorStop(.55,bottom);g.addColorStop(1,'#060606');sctx.fillStyle=g;sctx.fillRect(0,0,innerWidth,innerHeight)}
-function circleGlow(x,y,r,color,a=.35){const g=sctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,hexToRgba(color,a));g.addColorStop(1,hexToRgba(color,0));sctx.fillStyle=g;sctx.beginPath();sctx.arc(x,y,r,0,Math.PI*2);sctx.fill()}
-function hexToRgba(hex,a){const n=hex.replace('#','');const v=n.length===3?n.split('').map(c=>c+c).join(''):n;const num=parseInt(v,16);return `rgba(${(num>>16)&255},${(num>>8)&255},${num&255},${a})`}
-function mountainRange(peaks,baseY,color,snow){sctx.beginPath();sctx.moveTo(0,innerHeight);sctx.lineTo(0,baseY);for(const p of peaks){sctx.lineTo(p.x,p.y)}sctx.lineTo(innerWidth,baseY+40);sctx.lineTo(innerWidth,innerHeight);sctx.closePath();sctx.fillStyle=color;sctx.fill();if(snow){sctx.fillStyle=snow;for(const p of peaks){const left=60,right=70,height=110;sctx.beginPath();sctx.moveTo(p.x,p.y);sctx.lineTo(p.x-left,p.y+height);sctx.lineTo(p.x,p.y+height*.66);sctx.lineTo(p.x+right,p.y+height);sctx.closePath();sctx.fill()}}}
-function ridge(points,color,alpha=1){sctx.save();sctx.globalAlpha=alpha;sctx.beginPath();sctx.moveTo(0,innerHeight);sctx.lineTo(0,points[0].y);for(const p of points)sctx.lineTo(p.x,p.y);sctx.lineTo(innerWidth,innerHeight);sctx.closePath();sctx.fillStyle=color;sctx.fill();sctx.restore()}
-function drawPines(count,baseY,depth,color){for(let i=0;i<count;i++){const x=(i+.4)*innerWidth/count + ((i%3)-1)*18*depth;const h=(70+((i*37)%85))*depth;const w=h*.38;sctx.fillStyle=color;sctx.beginPath();sctx.moveTo(x,baseY-h);sctx.lineTo(x-w*.8,baseY-h*.58);sctx.lineTo(x-w*.35,baseY-h*.58);sctx.lineTo(x-w,baseY);sctx.lineTo(x+w,baseY);sctx.lineTo(x+w*.35,baseY-h*.58);sctx.lineTo(x+w*.8,baseY-h*.58);sctx.closePath();sctx.fill();sctx.fillRect(x-4*depth,baseY,8*depth,18*depth)}}
-function drawWater(y,colorTop,colorBottom){const g=sctx.createLinearGradient(0,y,0,innerHeight);g.addColorStop(0,colorTop);g.addColorStop(1,colorBottom);sctx.fillStyle=g;sctx.fillRect(0,y,innerWidth,innerHeight-y);sctx.strokeStyle='rgba(235,245,255,.16)';sctx.lineWidth=2;for(let i=0;i<6;i++){const yy=y+20+i*34;sctx.beginPath();for(let x=0;x<=innerWidth+60;x+=40){const off=Math.sin((x+i*25)/70)*5;sctx.lineTo(x,yy+off)}sctx.stroke()}}
-function drawCastle(cx,cy,scale=1,color='#111518',win='#d7d4b8'){const w=280*scale,h=160*scale;sctx.fillStyle=color;sctx.fillRect(cx-w/2,cy-h/2,w,h);sctx.fillRect(cx-w/2+18*scale,cy-h/2-70*scale,56*scale,h+70*scale);sctx.fillRect(cx+w/2-74*scale,cy-h/2-55*scale,56*scale,h+55*scale);roof(cx-w/2+46*scale,cy-h/2-70*scale,62*scale,44*scale,color);roof(cx+w/2-46*scale,cy-h/2-55*scale,62*scale,44*scale,color);for(let r=0;r<3;r++){for(let c=0;c<6;c++){windowRect(cx-w/2+25*scale+c*39*scale,cy-h/2+24*scale+r*38*scale,8*scale,12*scale,win)}}}
-function drawTower(x,y,h,color='#0f1114',win='#d8b470'){sctx.fillStyle=color;sctx.fillRect(x-25,y-h,50,h);roof(x,y-h,54,40,color);for(let i=0;i<6;i++)windowRect(x-8,y-h+28+i*(h-50)/6,7,10,win)}
-function roof(cx,top,w,h,color){sctx.fillStyle=color;sctx.beginPath();sctx.moveTo(cx,top-h);sctx.lineTo(cx-w/2,top);sctx.lineTo(cx+w/2,top);sctx.closePath();sctx.fill()}
-function windowRect(x,y,w,h,color){sctx.fillStyle=color;sctx.fillRect(x,y,w,h)}
-function drawCityLine(y,buildings,palette){for(let i=0;i<buildings;i++){const bw=lerp(22,90,((i*29)%100)/100);const bh=lerp(70,240,((i*53)%100)/100);const x=i*(innerWidth/buildings)+((i%3)-1)*8;sctx.fillStyle=palette[i%palette.length];sctx.fillRect(x,y-bh,bw,bh);if(i%5===0)roof(x+bw/2,y-bh,Math.max(22,bw*.7),lerp(18,38,((i*17)%100)/100),palette[i%palette.length]);if(i%6===1)sctx.fillRect(x+bw*.3,y-bh-45,bw*.15,45);for(let r=0;r<Math.max(2,Math.floor(bh/44));r++){for(let c=0;c<Math.max(1,Math.floor(bw/22));c++){windowRect(x+8+c*18,y-bh+10+r*24,5,8,'rgba(241,220,150,.55)')}}}}
-function drawBridge(y){sctx.strokeStyle='rgba(168,145,103,.7)';sctx.lineWidth=6;sctx.beginPath();sctx.moveTo(innerWidth*.24,y);sctx.quadraticCurveTo(innerWidth*.5,y-90,innerWidth*.76,y);sctx.stroke();sctx.lineWidth=2;for(let i=0;i<12;i++){const x=innerWidth*.24 + i*(innerWidth*.52/11);sctx.beginPath();sctx.moveTo(x,y);sctx.lineTo(x, y-18-Math.abs(6-i)*9);sctx.stroke()}}
-function drawVillage(x,y,count){for(let i=0;i<count;i++){const xx=x+i*58;const w=42+((i*17)%16),h=26+((i*23)%18);sctx.fillStyle='#2b231a';sctx.fillRect(xx,y-h,w,h);roof(xx+w/2,y-h,w+8,26,'#21180f');windowRect(xx+9,y-h+8,7,8,'rgba(255,221,160,.5)')}}
-function drawRuins(cx,cy,scale=1){sctx.fillStyle='#5a4735';sctx.fillRect(cx-110*scale,cy-52*scale,220*scale,96*scale);sctx.fillRect(cx-70*scale,cy-110*scale,42*scale,154*scale);sctx.fillRect(cx+28*scale,cy-130*scale,36*scale,174*scale);sctx.beginPath();sctx.moveTo(cx-18*scale,cy+44*scale);sctx.lineTo(cx-18*scale,cy-8*scale);sctx.quadraticCurveTo(cx,cy-80*scale,cx+18*scale,cy-8*scale);sctx.lineTo(cx+18*scale,cy+44*scale);sctx.closePath();sctx.fillStyle='#2f1d12';sctx.fill()}
-function drawLighthouse(x,y,scale=1){sctx.fillStyle='#ddd9cc';sctx.fillRect(x-18*scale,y-120*scale,36*scale,120*scale);sctx.fillStyle='#9e332d';sctx.fillRect(x-18*scale,y-92*scale,36*scale,16*scale);sctx.fillStyle='#ddd9cc';sctx.fillRect(x-18*scale,y-58*scale,36*scale,16*scale);roof(x,y-120*scale,42*scale,24*scale,'#23282d');circleGlow(x,y-120*scale,40*scale,'#fff5d6',.18)}
-function drawRock(x,y,w,h,color){sctx.fillStyle=color;sctx.beginPath();sctx.moveTo(x,y);sctx.lineTo(x+w*.14,y-h*.45);sctx.lineTo(x+w*.36,y-h);sctx.lineTo(x+w*.52,y-h*.62);sctx.lineTo(x+w*.75,y-h*.88);sctx.lineTo(x+w,y-h*.22);sctx.lineTo(x+w*.88,y);sctx.closePath();sctx.fill()}
-function drawSnowDots(count){for(let i=0;i<count;i++){sctx.fillStyle=`rgba(255,255,255,${.12+((i*11)%18)/100})`;const x=(i*97)%innerWidth;const y=(i*43)%innerHeight;const r=1+((i*13)%4)*.3;sctx.beginPath();sctx.arc(x,y,r,0,Math.PI*2);sctx.fill()}}
-function drawDust(count,color='rgba(255,233,181,.09)'){for(let i=0;i<count;i++){sctx.fillStyle=color;const x=(i*83)%innerWidth;const y=(i*61)%innerHeight;const r=1+((i*19)%4)*.6;sctx.beginPath();sctx.arc(x,y,r,0,Math.PI*2);sctx.fill()}}
-function drawCloud(x,y,w,h,a=.14){sctx.fillStyle=`rgba(255,255,255,${a})`;sctx.beginPath();sctx.ellipse(x,y,w*.35,h*.55,0,0,Math.PI*2);sctx.ellipse(x-w*.18,y+5,w*.28,h*.44,0,0,Math.PI*2);sctx.ellipse(x+w*.18,y+8,w*.24,h*.38,0,0,Math.PI*2);sctx.fill()}
-
-function drawScene(loc){resizeIfNeeded(); const w=innerWidth,h=innerHeight; sctx.clearRect(0,0,w,h); const portrait=h>w;
-  switch(loc.id){
-    case 'aethrion': {
-      sky('#6f685e','#221f1a'); circleGlow(w*.72,h*.19,portrait?120:180,'#ead9a4',.22); drawCloud(w*.55,h*.22,portrait?260:420,80,.08);
-      ridge([{x:0,y:h*.60},{x:w*.14,y:h*.54},{x:w*.26,y:h*.58},{x:w*.38,y:h*.52},{x:w*.51,y:h*.57},{x:w*.66,y:h*.50},{x:w*.82,y:h*.56},{x:w,y:h*.53}], '#27261f', .55);
-      drawCityLine(h*.72, portrait?12:18, ['#171611','#211f18','#12110e','#1f1a14']);
-      drawCastle(w*.53, portrait?h*.60:h*.58, portrait?1.05:1.12, '#0b0b0b', '#d6ba74'); drawTower(w*.53, portrait?h*.44:h*.40, portrait?210:250, '#0c0c0c', '#d4b36e');
-      drawWater(h*.79, '#415a60', '#111b1d'); drawBridge(h*.80); ridge([{x:0,y:h*.90},{x:w*.22,y:h*.88},{x:w*.38,y:h*.92},{x:w*.55,y:h*.87},{x:w*.74,y:h*.91},{x:w,y:h*.89}], '#080909');
-      drawDust(70,'rgba(240,220,170,.08)'); break; }
-    case 'velmor': {
-      sky('#99abb1','#23353e'); circleGlow(w*.64,h*.16,portrait?90:140,'#f5fafc',.12);
-      mountainRange([{x:w*.08,y:h*.53},{x:w*.22,y:h*.33},{x:w*.36,y:h*.50},{x:w*.54,y:h*.20},{x:w*.71,y:h*.49},{x:w*.88,y:h*.28}], h*.60, '#5e727b','#eaf1f3');
-      ridge([{x:0,y:h*.70},{x:w*.12,y:h*.62},{x:w*.23,y:h*.69},{x:w*.37,y:h*.56},{x:w*.53,y:h*.70},{x:w*.69,y:h*.61},{x:w*.82,y:h*.71},{x:w,y:h*.64}], '#304049', .78);
-      drawCastle(w*.50, portrait?h*.69:h*.67, portrait?.95:1.1, '#12191d', '#c1d9dd'); drawPines(portrait?9:14,h*.86, portrait?.75:.95,'#0c1313'); ridge([{x:0,y:h*.92},{x:w*.2,y:h*.89},{x:w*.4,y:h*.93},{x:w*.58,y:h*.90},{x:w*.8,y:h*.94},{x:w,y:h*.91}], '#0b1216'); drawSnowDots(80); break; }
-    case 'darvanis': {
-      sky('#7b5f45','#120c08'); circleGlow(w*.22,h*.18,portrait?65:90,'#f2c06d',.28); drawCloud(w*.24,h*.18,portrait?160:260,60,.08);
-      ridge([{x:0,y:h*.66},{x:w*.16,y:h*.58},{x:w*.32,y:h*.62},{x:w*.46,y:h*.57},{x:w*.60,y:h*.60},{x:w*.74,y:h*.54},{x:w*.9,y:h*.59},{x:w,y:h*.56}], '#21150f', .7);
-      drawCityLine(h*.76, portrait?11:17, ['#2a1a14','#1f140f','#160d09','#24160f']); drawTower(w*.74, portrait?h*.61:h*.58, portrait?220:260, '#140d09', '#e3a46b'); ridge([{x:0,y:h*.91},{x:w*.18,y:h*.86},{x:w*.36,y:h*.90},{x:w*.54,y:h*.84},{x:w*.72,y:h*.89},{x:w*.9,y:h*.85},{x:w,y:h*.88}], '#110b08'); drawDust(90,'rgba(255,208,139,.06)'); break; }
-    case 'bosque-korvan': {
-      sky('#708a74','#071109'); circleGlow(w*.56,h*.24,portrait?180:260,'#dfe1aa',.25); for(let i=0;i<4;i++)drawCloud(w*(.25+i*.18),h*(.20+i*.01),portrait?140:230,48,.05);
-      drawPines(portrait?15:24,h*.73, portrait?.82:1,'#183122'); drawPines(portrait?12:18,h*.86, portrait?1.06:1.2,'#09130b');
-      sctx.fillStyle='#2a2015'; sctx.fillRect(w*.47, h*.37, portrait?28:36, h*.41); sctx.fillStyle='#173223';
-      sctx.beginPath(); sctx.moveTo(w*.49,h*.22); sctx.bezierCurveTo(w*.33,h*.28,w*.28,h*.42,w*.40,h*.48); sctx.bezierCurveTo(w*.30,h*.54,w*.36,h*.68,w*.46,h*.64); sctx.bezierCurveTo(w*.50,h*.71,w*.60,h*.70,w*.63,h*.63); sctx.bezierCurveTo(w*.75,h*.68,w*.80,h*.55,w*.70,h*.48); sctx.bezierCurveTo(w*.79,h*.40,w*.72,h*.25,w*.57,h*.29); sctx.bezierCurveTo(w*.55,h*.25,w*.52,h*.22,w*.49,h*.22); sctx.fill();
-      sctx.strokeStyle='rgba(221,212,157,.15)'; sctx.lineWidth=3; for(let i=0;i<4;i++){sctx.beginPath();sctx.moveTo(w*(.42+i*.08),h*.24);sctx.lineTo(w*(.18+i*.18),h*.84);sctx.stroke()} drawDust(80,'rgba(222,240,196,.08)'); break; }
-    case 'tierras-heladas': {
-      sky('#b5c5ca','#1b2830'); circleGlow(w*.50,h*.14,portrait?130:180,'#eef8fb',.18); drawCloud(w*.5,h*.17,portrait?260:420,70,.08);
-      mountainRange([{x:w*.05,y:h*.51},{x:w*.18,y:h*.34},{x:w*.33,y:h*.55},{x:w*.49,y:h*.27},{x:w*.65,y:h*.57},{x:w*.82,y:h*.33},{x:w*.95,y:h*.52}], h*.60, '#6d818b','#f3f7f7');
-      ridge([{x:0,y:h*.73},{x:w*.16,y:h*.64},{x:w*.31,y:h*.72},{x:w*.47,y:h*.60},{x:w*.63,y:h*.74},{x:w*.79,y:h*.63},{x:w*.92,y:h*.72},{x:w,y:h*.68}], '#40535d', .8);
-      sctx.fillStyle='rgba(224,237,240,.78)'; sctx.fillRect(0,h*.82,w,h*.18); drawRock(w*.60,h*.84,portrait?90:110,portrait?80:95,'#b3dde6'); drawRock(w*.68,h*.84,portrait?75:95,portrait?62:84,'#93d0df');
-      ridge([{x:0,y:h*.95},{x:w*.22,y:h*.91},{x:w*.42,y:h*.96},{x:w*.57,y:h*.92},{x:w*.76,y:h*.96},{x:w,y:h*.93}], '#0e1519'); drawSnowDots(110); break; }
-    case 'islas-tronox': {
-      sky('#6f8790','#0d222b'); circleGlow(w*.68,h*.18,portrait?110:150,'#d6d9c8',.12); drawWater(h*.63,'#335f6e','#06171e');
-      drawRock(w*.07,h*.71,portrait?190:240,portrait?160:210,'#1a2825'); drawRock(w*.58,h*.69,portrait?250:320,portrait?200:240,'#1b2723');
-      drawCastle(w*.76, portrait?h*.63:h*.61, portrait?.68:.78,'#18201b','#dbc88b'); drawTower(w*.30, portrait?h*.68:h*.66, portrait?150:170, '#171b18','#dbc88b'); ridge([{x:0,y:h*.92},{x:w*.18,y:h*.88},{x:w*.38,y:h*.93},{x:w*.58,y:h*.89},{x:w*.79,y:h*.94},{x:w,y:h*.9}], '#02080b'); drawDust(40,'rgba(202,224,228,.08)'); break; }
-    case 'valle-arden': {
-      sky('#8c9a7a','#18261c'); circleGlow(w*.73,h*.16,portrait?85:120,'#f1f0b1',.18);
-      ridge([{x:0,y:h*.54},{x:w*.11,y:h*.44},{x:w*.23,y:h*.55},{x:w*.36,y:h*.39},{x:w*.49,y:h*.54},{x:w*.63,y:h*.42},{x:w*.78,y:h*.56},{x:w*.92,y:h*.46},{x:w,y:h*.52}], '#496149', .8);
-      ridge([{x:0,y:h*.69},{x:w*.18,y:h*.57},{x:w*.32,y:h*.70},{x:w*.47,y:h*.56},{x:w*.66,y:h*.68},{x:w*.82,y:h*.58},{x:w,y:h*.67}], '#315033', .85);
-      sctx.fillStyle='rgba(72,112,124,.9)'; sctx.beginPath(); sctx.moveTo(w*.47,h); sctx.quadraticCurveTo(w*.52,h*.78,w*.50,h*.63); sctx.quadraticCurveTo(w*.49,h*.55,w*.54,h*.50); sctx.quadraticCurveTo(w*.61,h*.57,w*.58,h); sctx.closePath(); sctx.fill();
-      drawVillage(w*.16,h*.74, portrait?3:5); drawPines(portrait?8:12,h*.83,.8,'#102118'); ridge([{x:0,y:h*.95},{x:w*.18,y:h*.91},{x:w*.36,y:h*.96},{x:w*.56,y:h*.9},{x:w*.78,y:h*.95},{x:w,y:h*.91}], '#142119'); drawDust(45,'rgba(246,238,185,.06)'); break; }
-    case 'lagos-eldra': {
-      sky('#819a9c','#132830'); circleGlow(w*.63,h*.17,portrait?95:130,'#edf1d3',.16); drawWater(h*.60,'#4d7377','#0d1d24');
-      ridge([{x:0,y:h*.58},{x:w*.15,y:h*.46},{x:w*.3,y:h*.59},{x:w*.44,y:h*.45},{x:w*.58,y:h*.58},{x:w*.77,y:h*.48},{x:w*.92,y:h*.57},{x:w,y:h*.54}], '#294346', .7);
-      drawVillage(w*.16,h*.64, portrait?2:3); drawRock(w*.70,h*.61,portrait?120:140,portrait?160:180,'#343433'); sctx.fillStyle='#5f5548'; sctx.beginPath(); sctx.moveTo(w*.73,h*.50); sctx.lineTo(w*.75,h*.43); sctx.lineTo(w*.77,h*.50); sctx.fill(); ridge([{x:0,y:h*.92},{x:w*.18,y:h*.87},{x:w*.34,y:h*.93},{x:w*.55,y:h*.88},{x:w*.74,y:h*.94},{x:w,y:h*.89}], '#081216'); drawDust(35,'rgba(228,236,201,.08)'); break; }
-    case 'desierto-kael': {
-      sky('#c28b55','#402514'); circleGlow(w*.73,h*.16,portrait?90:110,'#ffe1a3',.38);
-      ridge([{x:0,y:h*.66},{x:w*.18,y:h*.57},{x:w*.36,y:h*.68},{x:w*.54,y:h*.54},{x:w*.72,y:h*.66},{x:w*.88,y:h*.58},{x:w,y:h*.64}], '#a56335', .92);
-      ridge([{x:0,y:h*.79},{x:w*.2,y:h*.69},{x:w*.41,y:h*.80},{x:w*.62,y:h*.67},{x:w*.83,y:h*.79},{x:w,y:h*.72}], '#71401f', .95);
-      drawRuins(w*.58, portrait?h*.68:h*.65, portrait?.8:.95); ridge([{x:0,y:h*.95},{x:w*.18,y:h*.9},{x:w*.36,y:h*.96},{x:w*.57,y:h*.89},{x:w*.77,y:h*.95},{x:w,y:h*.91}], '#2a170d'); drawDust(120,'rgba(255,231,183,.1)'); break; }
-    case 'serynth': {
-      sky('#9c6c5a','#160d0d'); circleGlow(w*.72,h*.17,portrait?100:140,'#f0b58e',.18);
-      drawCityLine(h*.76, portrait?11:16, ['#2a1a19','#3a2524','#211515','#2e1d1c']);
-      sctx.fillStyle='#4a2e2b'; sctx.beginPath(); sctx.ellipse(w*.35, portrait?h*.70:h*.68, portrait?95:135, portrait?42:55,0,0,Math.PI*2); sctx.fill(); sctx.beginPath(); sctx.moveTo(w*.26,portrait?h*.70:h*.68); sctx.quadraticCurveTo(w*.35,portrait?h*.52:h*.50,w*.44,portrait?h*.70:h*.68); sctx.closePath(); sctx.fill(); sctx.fillStyle='#2b1b19'; sctx.fillRect(w*.27,portrait?h*.70:h*.68, portrait?150:210, portrait?92:120);
-      drawTower(w*.76, portrait?h*.62:h*.58, portrait?240:280, '#211515','#f0a36c'); ridge([{x:0,y:h*.93},{x:w*.18,y:h*.88},{x:w*.37,y:h*.95},{x:w*.56,y:h*.89},{x:w*.77,y:h*.95},{x:w,y:h*.9}], '#100909'); drawDust(60,'rgba(246,183,139,.08)'); break; }
-    case 'colinas-vorlen': {
-      sky('#81735e','#1c1711'); circleGlow(w*.67,h*.16,portrait?85:120,'#e6d6b0',.14);
-      ridge([{x:0,y:h*.60},{x:w*.11,y:h*.46},{x:w*.24,y:h*.60},{x:w*.38,y:h*.42},{x:w*.52,y:h*.61},{x:w*.69,y:h*.49},{x:w*.84,y:h*.61},{x:w,y:h*.52}], '#574e40', .88);
-      ridge([{x:0,y:h*.76},{x:w*.18,y:h*.64},{x:w*.37,y:h*.77},{x:w*.56,y:h*.62},{x:w*.76,y:h*.79},{x:w,y:h*.67}], '#302b22', .95);
-      sctx.strokeStyle='rgba(166,109,70,.7)'; sctx.lineWidth=10; sctx.beginPath(); sctx.moveTo(w*.30,h*.82); sctx.lineTo(w*.36,h*.73); sctx.lineTo(w*.42,h*.82); sctx.stroke(); sctx.beginPath(); sctx.moveTo(w*.33,h*.82); sctx.lineTo(w*.33,h*.75); sctx.moveTo(w*.39,h*.82); sctx.lineTo(w*.39,h*.75); sctx.stroke(); drawRock(w*.68,h*.80,portrait?160:210,portrait?160:190,'#1f1c16'); sctx.fillStyle='#0d0b09'; sctx.fillRect(w*.735,h*.69,portrait?38:52,portrait?90:120); sctx.fillStyle='#5b3b2d'; sctx.fillRect(w*.75,h*.66,10,portrait?115:145); drawDust(50,'rgba(229,210,170,.05)'); break; }
-    case 'puerto-libar': {
-      sky('#7d949a','#09171e'); circleGlow(w*.70,h*.18,portrait?90:120,'#ebf1d5',.15); drawWater(h*.62,'#345965','#07171e');
-      drawVillage(w*.12,h*.67, portrait?2:3); drawLighthouse(w*.25, h*.64, portrait?.88:1.0); drawCastle(w*.73, portrait?h*.61:h*.58, portrait?.88:1.0, '#1b1e1c', '#ddcb9e');
-      sctx.fillStyle='rgba(220,228,230,.22)'; sctx.beginPath(); sctx.moveTo(w*.46,h*.74); sctx.lineTo(w*.52,h*.63); sctx.lineTo(w*.57,h*.74); sctx.closePath(); sctx.fill(); sctx.fillStyle='#1e2528'; sctx.fillRect(w*.505,h*.74,8,46);
-      ridge([{x:0,y:h*.93},{x:w*.2,y:h*.89},{x:w*.38,y:h*.94},{x:w*.58,y:h*.89},{x:w*.77,y:h*.95},{x:w,y:h*.91}], '#030b0f'); drawDust(35,'rgba(213,231,233,.08)'); break; }
-    case 'mar-oeste': {
-      sky('#394b55','#0a171d'); circleGlow(w*.26,h*.17,portrait?70:100,'#cad4db',.08); drawCloud(w*.22,h*.18,portrait?180:260,56,.07); drawCloud(w*.72,h*.16,portrait?220:320,66,.08);
-      drawWater(h*.56,'#244854','#06141a'); drawRock(w*.66,h*.82,portrait?160:210,portrait?220:260,'#111a1d'); drawLighthouse(w*.73,h*.61,portrait?.8:.95); drawRock(w*.18,h*.80,portrait?90:120,portrait?110:140,'#172125');
-      sctx.strokeStyle='rgba(215,227,229,.38)'; sctx.lineWidth=8; sctx.beginPath(); sctx.moveTo(w*.46,h*.48); sctx.lineTo(w*.43,h*.56); sctx.lineTo(w*.48,h*.54); sctx.lineTo(w*.45,h*.66); sctx.stroke(); ridge([{x:0,y:h*.93},{x:w*.17,y:h*.89},{x:w*.35,y:h*.95},{x:w*.58,y:h*.9},{x:w*.78,y:h*.96},{x:w,y:h*.92}], '#02080b'); drawDust(24,'rgba(215,228,235,.07)'); break; }
-  }
-}
-function resizeIfNeeded(){const dpr=Math.min(2,window.devicePixelRatio||1); if(sceneCanvas.width!==Math.round(innerWidth*dpr) || sceneCanvas.height!==Math.round(innerHeight*dpr)) resizeSceneCanvas() }
-function enterScene(loc){current=loc; document.getElementById('scene-type').textContent=loc.label; document.getElementById('scene-name').textContent=loc.name; document.getElementById('scene-short').textContent=loc.short||''; drawScene(loc); scene.classList.add('open'); scene.setAttribute('aria-hidden','false')}
-function leaveScene(){scene.classList.remove('open'); scene.setAttribute('aria-hidden','true'); panel.classList.remove('panel-open'); app.classList.remove('dim'); hud.classList.remove('hud-hide'); current=null; document.querySelectorAll('.hotspot').forEach(h=>h.classList.remove('active'))}
-function openCurrentPanel(){if(current) openPanel(current)}
-function sceneSnapshot(loc){drawScene(loc); try{return sceneCanvas.toDataURL('image/jpeg',.92)}catch(e){return null}}
-function heroFor(loc){const shot=sceneSnapshot(loc); if(shot){hero.style.backgroundImage=`url('${shot}')`; hero.style.backgroundSize='cover'; hero.style.backgroundPosition='center'; return;} const w=hero.clientWidth||360,h=hero.clientHeight||190;const Z=Math.max(3.4,(w/mapW)*4.2);const bw=mapW*Z,bh=mapH*Z;const px=loc.x/100*bw-w/2,py=loc.y/100*bh-h/2;hero.style.backgroundImage=`url('${img.getAttribute('src')}')`;hero.style.backgroundSize=bw+'px '+bh+'px';hero.style.backgroundPosition=(-px)+'px '+(-py)+'px'}
-function openPanel(loc){current=loc;document.getElementById('p-type').textContent=loc.label;document.getElementById('p-name').textContent=loc.name;heroFor(loc);let h=`<section class="sec"><div class="sec-title">Descripción</div><p>${loc.desc}</p></section>`;if(loc.stats){h+='<section class="sec"><div class="sec-title">Datos</div><div class="stats">';Object.entries(loc.stats).forEach(([k,v])=>h+=`<div class="stat"><small>${k}</small><b>${v}</b></div>`);h+='</div></section>'}if(loc.lore)h+=`<section class="sec"><div class="sec-title">Crónicas</div><div class="quote">${loc.lore}</div></section>`;if(loc.places){h+='<section class="sec"><div class="sec-title">Lugares</div>';loc.places.forEach(p=>h+=`<div class="place">${p}</div>`);h+='</section>'}h+=`<div class="p-nav"><button onclick="goSibling(-1)">‹ Anterior</button><button onclick="resetView()">Ver todo</button><button onclick="goSibling(1)">Siguiente ›</button></div>`;document.getElementById('p-body').innerHTML=h;document.querySelector('.panel-body').scrollTop=0;panel.classList.add('panel-open')}
-function goSibling(d){if(!current)return;const i=locations.findIndex(l=>l.id===current.id);const next=locations[(i+d+locations.length)%locations.length];panel.classList.remove('panel-open');setTimeout(()=>focusLocation(next),140)}
-function closePanel(){panel.classList.remove('panel-open'); if(scene.classList.contains('open')) return; current=null; app.classList.remove('dim'); hud.classList.remove('hud-hide'); document.querySelectorAll('.hotspot').forEach(h=>h.classList.remove('active'))}
-function fitMap(animated){const pad=(innerWidth<720?20:80);const s=Math.max(.2,Math.min((innerWidth-pad)/mapW,(innerHeight-pad)/mapH));minScale=s*.8;const tx=(innerWidth-mapW*s)/2,ty=(innerHeight-mapH*s)/2;if(animated) animateTo(s,tx,ty,700);else{scale=s;posX=tx;posY=ty;apply()}}
-function resetView(){if(scene.classList.contains('open'))leaveScene();else closePanel();fitMap(true)}
-function zoomAt(cx,cy,f){const bx=(cx-posX)/scale,by=(cy-posY)/scale;scale=Math.max(minScale,Math.min(maxScale,scale*f));posX=cx-bx*scale;posY=cy-by*scale;clamp();apply()}
-function zoomAtCenter(f){if(anim)cancelAnimationFrame(anim);const cx=innerWidth/2,cy=innerHeight/2;const bx=(cx-posX)/scale,by=(cy-posY)/scale;const ts=Math.max(minScale,Math.min(maxScale,scale*f));animateTo(ts,cx-bx*ts,cy-by*ts,340)}
-
-wrap.addEventListener('mousedown',e=>{if(e.target.closest('.hotspot'))return;if(anim)cancelAnimationFrame(anim);drag=true;wrap.classList.add('dragging');startX=e.clientX-posX;startY=e.clientY-posY});
-addEventListener('mousemove',e=>{if(!drag)return;posX=e.clientX-startX;posY=e.clientY-startY;clamp();apply()});addEventListener('mouseup',()=>{drag=false;wrap.classList.remove('dragging')});
-wrap.addEventListener('wheel',e=>{e.preventDefault();if(anim)cancelAnimationFrame(anim);zoomAt(e.clientX,e.clientY,e.deltaY<0?1.12:.89)},{passive:false});
-wrap.addEventListener('touchstart',e=>{if(anim)cancelAnimationFrame(anim);if(e.touches.length===1){startX=e.touches[0].clientX-posX;startY=e.touches[0].clientY-posY}else if(e.touches.length===2){lastDist=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY)}},{passive:true});
-wrap.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&!e.target.closest('.hotspot')){posX=e.touches[0].clientX-startX;posY=e.touches[0].clientY-startY;clamp();apply()}else if(e.touches.length===2&&lastDist){const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);const cx=(e.touches[0].clientX+e.touches[1].clientX)/2,cy=(e.touches[0].clientY+e.touches[1].clientY)/2;zoomAt(cx,cy,d/lastDist);lastDist=d}},{passive:false});
-let lastTap=0;wrap.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTap<300&&e.changedTouches.length===1&&!e.target.closest('.hotspot')){const t=e.changedTouches[0],bx=(t.clientX-posX)/scale,by=(t.clientY-posY)/scale;const ts=scale<1.8?2.6:minScale*1.25;animateTo(ts,t.clientX-bx*ts,t.clientY-by*ts,420)}lastTap=now});
-wrap.addEventListener('dblclick',e=>{if(e.target.closest('.hotspot'))return;const bx=(e.clientX-posX)/scale,by=(e.clientY-posY)/scale;const ts=scale<1.8?2.2:minScale*1.25;animateTo(ts,e.clientX-bx*ts,e.clientY-by*ts,420)});
-addEventListener('keydown',e=>{if(e.key==='Escape')resetView()});
-function toggleLegend(){document.getElementById('legend').classList.toggle('legend-open');document.getElementById('legend-btn').classList.toggle('active')}
-function toggleMusic(){const a=document.getElementById('ambience'),btn=document.getElementById('music-btn');if(a.paused){a.play().then(()=>{btn.classList.add('active');btn.textContent='♬'}).catch(()=>{alert('Poné tu archivo de música como ambiente-cetrios.mp3 en la misma carpeta que este HTML.')})}else{a.pause();btn.classList.remove('active');btn.textContent='♪'}}
-function setup(){mapW=900;mapH=mapW*((img.naturalHeight||1100)/(img.naturalWidth||900));locations.forEach(addSpot);fitMap(false);resizeSceneCanvas();setTimeout(()=>{const l=document.getElementById('loading');l.classList.add('loading-done');setTimeout(()=>l?.remove(),800)},900)}
-addEventListener('resize',()=>{if(!current)fitMap(false); resizeSceneCanvas()}); if(img.complete)setup(); else img.onload=setup;
-</script>
-</body>
-</html>
+<svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+<symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m16 8-2 6-6 2 2-6 6-2Z"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 6.5h14M5 17.5h14"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Zm6-2v16m6-14v16"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="m14 5-7 7 7 7M7 12h14"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+<symbol id="i-expand" viewBox="0 0 24 24"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></symbol>
+<symbol id="i-sound" viewBox="0 0 24 24"><path d="m11 4-6 5H2v6h3l6 5V4Zm4 4c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Z"/><circle cx="12" cy="10" r="2"/></symbol>
+</defs></svg>
+<a class="skip" href="#destinations">Ir a los destinos</a>
+<header class="topbar">
+ <a href="#" class="brand" aria-label="Cetrios, volver al mundo"><svg class="brand-icon"><use href="#i-compass"/></svg><span><b>CETRIOS</b><small>EL MUNDO DE LOS ECOS</small></span></a>
+ <div class="view-switch" role="group" aria-label="Vista del mapa"><button id="globe-mode" aria-pressed="true"><svg><use href="#i-globe"/></svg><span>Esfera</span></button><button id="map-mode" aria-pressed="false"><svg><use href="#i-map"/></svg><span>Mapa</span></button></div>
+ <button id="mobile-destinations" class="button nav-toggle" aria-controls="sidebar" aria-expanded="false"><svg><use href="#i-list"/></svg>Destinos</button>
+ <span class="header-note">ATLAS DE CETRIOS <span class="tiny-star">✦</span></span>
+</header>
+<main id="workspace">
+ <button id="sidebar-backdrop" aria-label="Cerrar destinos" hidden></button>
+ <aside id="sidebar" aria-label="Destinos de Cetrios">
+  <div class="sidebar-heading"><div><p class="eyebrow">EL MUNDO CONOCIDO</p><h1>Elegí tu destino</h1></div><button class="icon-button mobile-close" id="close-destinations" aria-label="Cerrar destinos"><svg><use href="#i-close"/></svg></button></div>
+  <nav id="destinations" tabindex="-1" aria-label="Continentes y lugares"></nav>
+  <div class="sidebar-foot"><svg><use href="#i-compass"/></svg><span>Un mundo. Muchas historias.</span></div>
+ </aside>
+ <section id="map-area" aria-label="Mapa interactivo de Cetrios">
+  <div class="map-kicker"><span class="eyebrow">CARTOGRAFÍA DEL MUNDO ECO</span><p id="view-title">Continente Central</p></div>
+  <div id="viewport" tabindex="0" aria-label="Planeta de Cetrios. Arrastrá para girar, usá más y menos para acercar. Flechas del teclado para mover.">
+   <canvas id="globe" aria-hidden="true"></canvas>
+   <div id="flat-stage" hidden><img id="flat-map" alt="Mapa oficial de Cetrios con sus continentes, mares y reinos" draggable="false"></div>
+   <div id="markers" aria-label="Lugares visibles en el mapa"></div>
+  </div>
+  <div id="map-loading" role="status"><svg><use href="#i-compass"/></svg><span>Abriendo el atlas…</span></div>
+  <div class="north" aria-hidden="true">N<span>│</span></div>
+  <div class="map-tools"><button id="zoom-in" class="icon-button" aria-label="Acercar" title="Acercar"><svg><use href="#i-plus"/></svg></button><button id="zoom-out" class="icon-button" aria-label="Alejar" title="Alejar"><svg><use href="#i-minus"/></svg></button><span class="tool-divider"></span><button id="reset" class="icon-button" aria-label="Volver a la vista inicial" title="Vista inicial"><svg><use href="#i-compass"/></svg></button><button id="labels" class="icon-button active" aria-pressed="true" aria-label="Mostrar nombres" title="Mostrar nombres"><svg><use href="#i-pin"/></svg></button></div>
+  <div class="map-footer"><p id="gesture-hint">Arrastrá para girar <span>·</span> Acercá para explorar</p><button id="sound" class="icon-button" aria-label="Activar sonido ambiente" aria-pressed="false" title="Sonido ambiente"><svg><use href="#i-sound"/></svg></button></div>
+  <button id="featured" class="featured" hidden><img id="featured-image" alt=""><span class="featured-copy"><small id="featured-region"></small><b id="featured-title"></b><span>Viajar a este lugar <svg><use href="#i-next"/></svg></span></span></button>
+  <div id="travel-flash" aria-hidden="true"></div>
+ </section>
+</main>
+<dialog id="journey" aria-labelledby="journey-title">
+ <div class="journey-art"><img id="journey-image" alt=""><div class="image-scrim"></div><div id="journey-image-error" hidden><p>No se pudo cargar esta vista.</p><button id="retry-image" class="button">Volver a intentar</button></div></div>
+ <div class="journey-top"><button id="back-to-world" class="button glass"><svg><use href="#i-back"/></svg>Volver al mundo</button><div class="journey-actions"><button id="fullscreen" class="icon-button glass" aria-label="Ver paisaje sin panel" aria-pressed="false" title="Ver paisaje sin panel"><svg><use href="#i-expand"/></svg></button><button id="close-journey" class="icon-button glass" aria-label="Cerrar lugar"><svg><use href="#i-close"/></svg></button></div></div>
+ <div class="journey-content"><div class="journey-intro"><p class="eyebrow" id="journey-region"></p><h2 id="journey-title"></h2><p id="journey-description"></p><div id="subplaces" class="subplaces" aria-label="Lugares de esta región"></div></div><div class="journey-gallery"><div class="gallery-heading"><span>VISTAS DEL LUGAR</span><span id="gallery-count"></span></div><div id="thumbnails" aria-label="Galería"></div><p id="view-caption"></p></div></div>
+ <div class="journey-bottom"><button id="previous-place" class="text-button"><svg><use href="#i-back"/></svg>Destino anterior</button><span id="journey-position"></span><button id="next-place" class="text-button">Siguiente destino<svg><use href="#i-next"/></svg></button></div>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<noscript><div class="noscript">Activá JavaScript para explorar la esfera interactiva de Cetrios.</div></noscript>
+<script src="data.js"></script><script src="globe.js"></script><script src="app.js"></script>
+</body></html>
